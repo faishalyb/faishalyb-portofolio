@@ -1,7 +1,6 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import DemoPromotion from '../components/DemoPromotion.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { getImage } from 'astro:assets';
 import { avatar } from '../data/photos';
@@ -22,10 +21,10 @@ interface Props {
 }
 
 const {
-  title = `${profile.name} — ${profile.role}`,
+  title = `${profile.name} · ${profile.role}`,
   description = profile.bio,
   image = '/og-cover.png',
-  imageAlt = `${profile.name}, ${profile.role} — portfolio preview`,
+  imageAlt = `${profile.name}, ${profile.role}: portfolio preview`,
   type = 'website',
   noindex = false,
   schema,
@@ -56,7 +55,7 @@ const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   '@id': new URL('/#website', Astro.site).toString(),
-  name: `${profile.name} — Portfolio`,
+  name: `${profile.name} · Portfolio`,
   url: siteUrl,
   description: profile.bio,
   inLanguage: 'en',
@@ -91,7 +90,7 @@ const jsonLd = noindex
     <script is:inline>
       document.documentElement.classList.add('has-js');
       try {
-        const savedTheme = localStorage.getItem('latentfolio-theme');
+        const savedTheme = localStorage.getItem('theme');
         const systemTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.theme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : systemTheme;
       } catch {
@@ -113,7 +112,7 @@ const jsonLd = noindex
     <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large'} />
 
     <meta property="og:type" content={type} />
-    <meta property="og:site_name" content={`${profile.name} — Portfolio`} />
+    <meta property="og:site_name" content={`${profile.name} · Portfolio`} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -134,27 +133,16 @@ const jsonLd = noindex
   </head>
   <body id="top">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <div class="page-noise" aria-hidden="true"></div>
     <Header />
-    <DemoPromotion />
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
     <Footer />
     <Lightbox />
-    <div class="cursor-glow" aria-hidden="true" data-cursor-glow></div>
 
     <script>
+      // Blocks marked data-reveal rise once when they enter the viewport.
       const setupGlobalEffects = () => {
-        const glow = document.querySelector<HTMLElement>('[data-cursor-glow]');
-        if (glow && !glow.dataset.ready && matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          glow.dataset.ready = 'true';
-          window.addEventListener('pointermove', (event) => {
-            glow.style.setProperty('--pointer-x', `${event.clientX}px`);
-            glow.style.setProperty('--pointer-y', `${event.clientY}px`);
-          }, { passive: true });
-        }
-
         const reveals = document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal-ready])');
         if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
           const observer = new IntersectionObserver((entries) => {

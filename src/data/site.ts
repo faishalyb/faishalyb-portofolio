@@ -33,30 +33,24 @@ export const socialLinks = [
 ];
 
 export const pageCopy = {
-  seoTitle: `${profile.name} — ${profile.role}`,
+  seoTitle: `${profile.name} · ${profile.role}`,
   seoDescription: `${profile.role} in Jakarta. Offline-first Flutter apps for palm oil plantations: on-device face recognition, NFC, Bluetooth thermal printing and SQLite sync.`,
-  heroEyebrow: profile.role,
-  heroLocation: `${profile.location} · ${profile.title} at Lentera Kreasi Teknologi`,
-  heroLead: 'I build apps that work',
-  heroMiddle: 'where the signal',
-  heroAccent: 'doesn’t.',
-  heroSummary: 'Offline-first Flutter apps for palm oil plantations — on-device face recognition, NFC tags, printed tickets and local sync — used every day by harvesters, supervisors and field assistants.',
+  heroSummary: 'Offline-first Flutter apps for palm oil plantations: on-device face recognition, NFC tags, printed tickets and local sync. Harvesters, supervisors and field assistants use them every day.',
+  receiptsIntro: 'Every number names where it comes from.',
   workIntro: 'Each project is told through the problem in the field, the engineering decisions, how it was measured, and what changed.',
   expertiseIntro: 'Most of my work runs on low-end Android phones, far from a stable connection. That shapes every decision: what runs on the device, what is stored locally, and what can wait for sync.',
   journeyIntro: 'From researching software-defined networks in a university lab to leading the mobile side of a plantation system used across three palm oil groups.',
-  writingKicker: '04 / Publications',
-  writingIntro: 'Research from my final capstone and community service, published and registered.',
-  contactKicker: 'Building something for the field?',
-  contactTitle: 'Let’s make it work offline.',
+  publicationsIntro: 'Research from my final capstone and community service, published and registered.',
+  beyondLead: 'Before plantations, I researched networks, built cloud backends at Bangkit and shipped a published waste-detection app.',
   contactBody: `I’m ${profile.availability.toLowerCase()}, especially teams shipping mobile apps that have to work in hard conditions.`,
 };
 
 export const proofPoints = [
-  { value: '99.1%', label: 'face verification TAR @ FAR 1e-4', detail: 'LFW benchmark' },
-  { value: '6.9 MB', label: 'face model, down from 47 MB', detail: 'ArcFace MobileFaceNet' },
-  { value: '3', label: 'palm oil groups on one app', detail: 'DO! IAM' },
-  { value: '0.83', label: 'mAP50 on-device PPE detection', detail: 'YOLO, 6 classes' },
-  { value: '~0.5 s', label: 'to load 10,000 inspections', detail: 'SQL aggregates' },
+  { value: '99.1%', label: 'true accept rate at a 1 in 10,000 false accept rate', source: 'LFW benchmark' },
+  { value: '6.9 MB', label: 'face model, down from 47 MB', source: 'model file size' },
+  { value: '3', label: 'palm oil groups on one app', source: 'DO! IAM rollout' },
+  { value: '0.83', label: 'mAP50 for on-device PPE detection', source: 'test split, 6 classes' },
+  { value: '~0.5 s', label: 'to load 10,000 inspections', source: 'measured on a laptop' },
 ];
 
 export type CaseTable = {
@@ -96,7 +90,7 @@ export const caseStudies: CaseStudy[] = [
     index: '01',
     label: 'On-device ML · Face recognition',
     title: 'Face attendance that tells similar workers apart, fully offline.',
-    seoTitle: `On-device Face Recognition for Plantation Attendance — ${profile.name}`,
+    seoTitle: `On-device Face Recognition for Plantation Attendance · ${profile.name}`,
     summary: 'DO! IAM checks in plantation workers by face on low-end Android phones with no signal. I replaced the face model, added alignment and liveness, and recalibrated every threshold.',
     outcome: '99.1% TAR @ FAR 1e-4 · 47 MB → 6.9 MB',
     period: '2026 · Phase 2',
@@ -121,7 +115,7 @@ export const caseStudies: CaseStudy[] = [
         head: ['Model', 'Size', 'FAR 1e-3', 'FAR 1e-4', 'FAR 1e-5'],
         rows: [
           ['FaceNet-512 (Phase 1)', '~47 MB', '95.7%', '84.6%', '64.8%'],
-          ['MobileFaceNet, 192-d', '—', '98.3%', '95.6%', '88.9%'],
+          ['MobileFaceNet, 192-d', 'n/a', '98.3%', '95.6%', '88.9%'],
           ['ArcFace MobileFaceNet, w600k_mbf (Phase 2)', '6.9 MB', '99.4%', '99.1%', '98.0%'],
         ],
         note: 'Measured on the LFW benchmark, not on field data.',
@@ -137,7 +131,7 @@ export const caseStudies: CaseStudy[] = [
     index: '02',
     label: 'Offline-first · Field hardware',
     title: 'One plantation system, two phases: NFC tags, then printed tickets.',
-    seoTitle: `DO! IAM Offline Plantation App — ${profile.name}`,
+    seoTitle: `DO! IAM Offline Plantation App · ${profile.name}`,
     summary: 'DO! IAM is a new plantation information management system built from scratch for three palm oil groups. It replaces paper for attendance, harvest, transport, inspection and nursery work.',
     outcome: '3 palm oil groups · 2 delivery phases',
     period: 'Nov 2025 – Present',
@@ -177,7 +171,7 @@ export const caseStudies: CaseStudy[] = [
     index: '03',
     label: 'Plantation apps · Play Store',
     title: 'Harvest, inspection and external orders for ANJ estates.',
-    seoTitle: `ePMS and eTis Plantation Apps — ${profile.name}`,
+    seoTitle: `ePMS and eTis Plantation Apps · ${profile.name}`,
     summary: 'At PT Austindo Nusantara Jaya I developed and maintained two Flutter apps: ePMS for estate planning, harvest and inspection, and eTis for plasma and external growers selling fruit to ANJ.',
     outcome: '2 apps maintained and released on the Play Store',
     period: 'Dec 2024 – Aug 2025',
@@ -205,7 +199,7 @@ export const caseStudies: CaseStudy[] = [
     index: '04',
     label: 'Computer vision · Final capstone',
     title: 'A waste bank app that recognises trash from a photo.',
-    seoTitle: `WasteApp, a Flutter Waste Detection App — ${profile.name}`,
+    seoTitle: `WasteApp, a Flutter Waste Detection App · ${profile.name}`,
     summary: 'WasteApp is the Flutter app I built for a waste bank in Bandung as my final capstone at Telkom University. Point the camera at a pile of waste and a YOLOv8 service names each item, then the app tracks the stock.',
     outcome: 'IEEE paper · registered IP (HKI) · on Google Play',
     period: 'Nov 2023 – Aug 2024',
@@ -256,8 +250,8 @@ export const experience: Experience[] = [
     marker: 'LK',
     logo: 'lkt',
     roles: [
-      { title: 'Software Developer Project Officer', dates: 'Nov 2025 — Present' },
-      { title: 'Programmer Enterprise System 1', dates: 'Sep 2025 — Nov 2025' },
+      { title: 'Software Developer Project Officer', dates: 'Nov 2025 – Present' },
+      { title: 'Programmer Enterprise System 1', dates: 'Sep 2025 – Nov 2025' },
     ],
     note: 'Joined after the ANJ–First Resources acquisition. Now lead the mobile side of DO! IAM for three palm oil groups, from face recognition to printed field tickets.',
   },
@@ -266,7 +260,7 @@ export const experience: Experience[] = [
     location: 'South Jakarta',
     marker: 'AJ',
     logo: 'anj',
-    roles: [{ title: 'Mobile Apps Developer Staff', dates: 'Dec 2024 — Aug 2025' }],
+    roles: [{ title: 'Mobile Apps Developer Staff', dates: 'Dec 2024 – Aug 2025' }],
     note: 'Developed and released ePMS and eTis on the Play Store, and cut sync time by refactoring local data fetching.',
   },
   {
@@ -274,7 +268,7 @@ export const experience: Experience[] = [
     location: 'Bandung',
     marker: 'AN',
     logo: 'adaptive-network',
-    roles: [{ title: 'Research Assistant', dates: 'Jun 2022 — Sep 2024' }],
+    roles: [{ title: 'Research Assistant', dates: 'Jun 2022 – Sep 2024' }],
     note: 'One of about 20 assistants picked from 100 candidates. Researched P4 and next-generation SDN and ran lab instances on OpenStack. Also in the People Development division: ran the monthly NetClass tech talks and NetNongkrong team events.',
     gallery: 'research',
     link: { label: 'Lab profile video', href: 'https://www.youtube.com/watch?v=xbQWlYBBHWQ' },
@@ -284,26 +278,23 @@ export const experience: Experience[] = [
     location: 'Google, GoTo, Traveloka',
     marker: 'BA',
     logo: 'bangkit',
-    roles: [{ title: 'Cloud Computing Cohort', dates: 'Feb 2023 — Jul 2023' }],
+    roles: [{ title: 'Cloud Computing Cohort', dates: 'Feb 2023 – Jul 2023' }],
     note: 'Built and deployed the Cycle-Me capstone backend on Google Cloud (App Engine, Cloud Run, Cloud SQL).',
   },
 ];
 
 export const expertise = [
   {
-    number: '01',
     title: 'Offline-first mobile',
     description: 'Flutter apps that keep working without a connection: local SQLite as the source of truth, careful sync, and screens built for gloves and sunlight.',
     tools: ['Flutter', 'Dart', 'GetX', 'Drift', 'SQLite', 'Dio'],
   },
   {
-    number: '02',
     title: 'On-device ML',
-    description: 'Face recognition, liveness and object detection that run on low-end phones — measured at strict thresholds and kept within memory limits.',
+    description: 'Face recognition, liveness and object detection that run on low-end phones, measured at strict thresholds and kept within memory limits.',
     tools: ['TensorFlow Lite', 'Google ML Kit', 'YOLO', 'MiniFASNet', 'Python'],
   },
   {
-    number: '03',
     title: 'Field hardware & geo',
     description: 'NFC tags, Bluetooth thermal printers, GPS geofencing and offline maps, wired into the same offline data model.',
     tools: ['NFC', 'Bluetooth printer', 'GPS', 'PMTiles', 'GIS routing', 'Java'],
@@ -317,7 +308,6 @@ export const articles = [
     date: '2024',
     source: 'IEEE',
     category: 'Computer vision',
-    visual: 'ads' as const,
     href: 'https://ieeexplore.ieee.org/document/10914827',
   },
   {
@@ -326,17 +316,16 @@ export const articles = [
     date: '2022',
     source: 'Open Library Telkom University',
     category: 'Community service',
-    visual: 'inquiry' as const,
     href: 'https://openlibrarypublications.telkomuniversity.ac.id/index.php/cosecant/article/view/18658',
   },
 ];
 
-export const writingArchiveUrl = 'https://github.com/faishalyb';
+export const githubUrl = 'https://github.com/faishalyb';
 
 export const education = {
   degree: 'B.Eng., Telecommunication Engineering',
   institution: 'Telkom University, Bandung',
-  dates: '2020 — 2024',
+  dates: '2020 – 2024',
   score: 'GPA 3.54 / 4.00',
   certifications: [
     'Google Cloud Computing Foundations',
@@ -371,4 +360,24 @@ export const wedding = {
   title: 'Terang Wedding Organizer',
   headline: 'I ran weddings before I ran software rollouts.',
   body: 'Freelance wedding organizer around Brebes, Tegal and Slawi during online classes: decoration, catering and looking after the couple on the day.',
+};
+
+/** How a face check runs in DO! IAM. Shown as the hero receipt. Thresholds are the app's cosine-similarity settings. */
+export const faceCheck = {
+  steps: [
+    { name: 'Detect', detail: 'Google ML Kit' },
+    { name: 'Align', detail: '5 landmarks to 112 px' },
+    { name: 'Liveness', detail: 'MiniFASNet, passive' },
+    { name: 'Match', detail: 'ArcFace MobileFaceNet' },
+  ],
+  modes: [
+    { id: 'check-in', label: 'Daily check-in', threshold: '0.35', rule: 'best match must lead by 0.08' },
+    { id: 'login', label: 'Verifier login', threshold: '0.40', rule: 'stricter, because it opens the app' },
+    { id: 'register', label: 'Registration', threshold: '0.45', rule: 'flags a face enrolled under another name' },
+  ],
+  facts: [
+    { name: 'Model', detail: '6.9 MB' },
+    { name: 'Network', detail: 'none' },
+  ],
+  total: { label: 'True accept rate at FAR 1e-4', value: '99.1%', source: 'LFW benchmark, not field data' },
 };

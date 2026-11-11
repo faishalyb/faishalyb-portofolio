@@ -1,14 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Icon from '../components/Icon.astro';
 ---
 
-<BaseLayout title="Page not found — Faishal Yusuf Baqir" description="This page could not be found." noindex>
+<BaseLayout title="Page not found · Faishal Yusuf Baqir" description="This page could not be found." noindex>
   <section class="not-found shell">
-    <div class="not-found-code" aria-hidden="true"><span>4</span><i></i><span>4</span></div>
-    <span class="section-kicker">No signal on this route</span>
-    <h1>This page is<br /><em>out of coverage.</em></h1>
-    <p>The rest of the portfolio works fine — offline, even.</p>
-    <a class="button button-primary" href="/">Return home <Icon name="arrow-right" size={17} /></a>
+    <span class="label">Error 404</span>
+    <h1>This page is <em>out of coverage.</em></h1>
+    <p>The address may be mistyped, or the page has moved. The rest of the portfolio is where you left it.</p>
+    <a class="btn btn-primary" href="/">Back to the home page</a>
   </section>
 </BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    justify-items: start;
+    gap: 20px;
+    padding-block: clamp(64px, 12vw, 140px);
+  }
+  .not-found p {
+    max-width: 48ch;
+    color: var(--muted);
+  }
+</style>

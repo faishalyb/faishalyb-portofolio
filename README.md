@@ -1,4 +1,4 @@
-# Faishal Yusuf Baqir — Portfolio
+# Faishal Yusuf Baqir · Portfolio
 
 Personal portfolio built with [Astro](https://astro.build), based on the MIT-licensed
 [LatentFolio Free](https://github.com/Dharani-Eswaramurthi/latentfolio) template by Dharani Eswaramurthi.
@@ -22,8 +22,10 @@ npm run preview  # serve the built site
 | Home page sections | `src/pages/index.astro` |
 | Case study pages (`/work/<slug>`) | `src/pages/work/[slug].astro` |
 | Project card visuals | `src/components/ProjectVisual.astro` |
-| Hero face-check demo | `src/components/InferenceDemo.astro` |
-| Colors and fonts | `src/styles/global.css` (`--violet` is the main green accent) |
+| Hero receipt (how a face check runs) | `src/components/Receipt.astro` |
+| Design direction: palette, type, shape, motion | `DESIGN.md` |
+| Colour and type tokens | `src/styles/global.css` |
+| antislop audit and follow-up report | `anti-slop/` |
 | CV and portfolio PDFs | `public/faishal-yusuf-baqir-cv.pdf`, `public/faishal-yusuf-baqir-portfolio.pdf` |
 | Social share image | `public/og-cover.svg` → `public/og-cover.png` |
 | Photos (text, alt, captions) | `src/data/photos.ts` |

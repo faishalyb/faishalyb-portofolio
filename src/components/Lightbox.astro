@@ -6,7 +6,8 @@ import Icon from './Icon.astro';
   <button class="lb-btn lb-close" type="button" aria-label="Close photo viewer" data-lb-close><Icon name="close" size={20} /></button>
   <button class="lb-btn lb-prev" type="button" aria-label="Previous photo" data-lb-prev><Icon name="arrow-right" size={20} /></button>
   <figure class="lb-figure">
-    <img class="lb-img" alt="" data-lb-img />
+    <p class="lb-status" role="status" data-lb-status></p>
+    <img class="lb-img" alt="" width="1800" height="1200" data-lb-img hidden />
     <figcaption class="lb-caption" data-lb-caption></figcaption>
   </figure>
   <button class="lb-btn lb-next" type="button" aria-label="Next photo" data-lb-next><Icon name="arrow-right" size={20} /></button>
@@ -18,20 +19,36 @@ import Icon from './Icon.astro';
     const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
     const image = dialog?.querySelector<HTMLImageElement>('[data-lb-img]');
     const caption = dialog?.querySelector<HTMLElement>('[data-lb-caption]');
+    const status = dialog?.querySelector<HTMLElement>('[data-lb-status]');
     const previous = dialog?.querySelector<HTMLButtonElement>('[data-lb-prev]');
     const next = dialog?.querySelector<HTMLButtonElement>('[data-lb-next]');
     const close = dialog?.querySelector<HTMLButtonElement>('[data-lb-close]');
-    if (!dialog || !image || !caption || !previous || !next || !close || dialog.dataset.ready) return;
+    if (!dialog || !image || !caption || !status || !previous || !next || !close || dialog.dataset.ready) return;
     dialog.dataset.ready = 'true';
 
     let items: HTMLAnchorElement[] = [];
     let index = 0;
 
+    // Three states: loading (status text), loaded (photo), error (status text, photo hidden).
+    image.addEventListener('load', () => {
+      status.textContent = '';
+      image.hidden = false;
+    });
+    image.addEventListener('error', () => {
+      if (!image.getAttribute('src')) return;
+      image.hidden = true;
+      status.textContent = 'This photo could not be loaded. Check your connection and try again.';
+    });
+
     const show = (target: number) => {
       index = (target + items.length) % items.length;
       const link = items[index];
-      image.src = link.href;
+      image.hidden = true;
+      status.textContent = 'Loading photo…';
+      image.width = Number(link.dataset.w) || 1800;
+      image.height = Number(link.dataset.h) || 1200;
       image.alt = link.dataset.alt ?? '';
+      image.src = link.href;
       caption.textContent = link.dataset.caption ?? '';
       previous.hidden = next.hidden = items.length < 2;
     };
@@ -60,7 +77,11 @@ import Icon from './Icon.astro';
       if (event.key === 'ArrowLeft') show(index - 1);
       if (event.key === 'ArrowRight') show(index + 1);
     });
-    dialog.addEventListener('close', () => image.removeAttribute('src'));
+    dialog.addEventListener('close', () => {
+      image.removeAttribute('src');
+      image.hidden = true;
+      status.textContent = '';
+    });
   };
   setupLightbox();
   document.addEventListener('astro:page-load', setupLightbox);
@@ -77,7 +98,7 @@ import Icon from './Icon.astro';
     margin: 0;
     padding: 0;
     color: #fff;
-    background: rgba(10, 9, 13, 0.92);
+    background: rgba(10, 9, 13, 0.94);
     border: 0;
   }
   .lightbox[open] {
@@ -86,7 +107,7 @@ import Icon from './Icon.astro';
     align-items: center;
     justify-items: center;
     gap: 10px;
-    padding: 60px 14px 30px;
+    padding: 64px 14px 30px;
   }
   .lightbox::backdrop {
     background: transparent;
@@ -103,32 +124,42 @@ import Icon from './Icon.astro';
     width: auto;
     height: auto;
     max-width: min(100%, 1500px);
-    max-height: calc(100dvh - 170px);
+    max-height: calc(100dvh - 180px);
     object-fit: contain;
     border-radius: 10px;
     pointer-events: auto;
   }
+  .lb-img[hidden] {
+    display: none;
+  }
+  .lb-status:empty {
+    display: none;
+  }
+  .lb-status,
   .lb-caption {
     max-width: 640px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.88rem;
+    color: #e4dfd8;
+    font-size: 0.95rem;
     text-align: center;
     pointer-events: auto;
   }
   .lb-btn {
     display: grid;
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     place-items: center;
+    padding: 0;
     color: #fff;
     background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
-    cursor: pointer;
-    transition: background 160ms ease;
+    transition: background-color 160ms ease;
   }
   .lb-btn:hover {
     background: rgba(255, 255, 255, 0.24);
+  }
+  .lb-btn:active {
+    background: rgba(255, 255, 255, 0.36);
   }
   .lb-btn:focus-visible {
     outline: 3px solid #fff;
@@ -139,7 +170,7 @@ import Icon from './Icon.astro';
   }
   .lb-close {
     position: absolute;
-    top: 14px;
+    top: 10px;
     right: 14px;
     z-index: 2;
   }
@@ -152,7 +183,7 @@ import Icon from './Icon.astro';
   @media (max-width: 640px) {
     .lightbox[open] {
       grid-template-columns: minmax(0, 1fr);
-      padding: 60px 10px 96px;
+      padding: 64px 10px 100px;
     }
     .lb-prev,
     .lb-next {

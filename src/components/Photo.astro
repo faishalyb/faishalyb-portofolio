@@ -40,11 +40,11 @@ const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
 ---
 
 {group && viewerOnly ? (
-  <a class="photo-extra" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt} hidden></a>
+  <a class="photo-extra" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt} data-w={full?.attributes.width} data-h={full?.attributes.height} hidden></a>
 ) : (
   <div class:list={['photo', shape, { 'photo-cover': cover }, className]}>
     {group ? (
-      <a class="photo-link" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt}>
+      <a class="photo-link" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt} data-w={full?.attributes.width} data-h={full?.attributes.height}>
         <Image src={photo.src} alt={photo.alt} widths={widths} sizes={sizes} class="photo-img" priority={priority} />
         {count > 1 && <span class="photo-more" aria-hidden="true">{count} photos</span>}
         {count > 1 && <span class="sr-only">, opens a viewer with {count} photos</span>}
@@ -60,8 +60,8 @@ const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
     position: relative;
     min-width: 0;
     overflow: hidden;
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    border-radius: 12px;
+    background: var(--paper-deep);
   }
   .photo-link {
     display: block;
@@ -69,7 +69,7 @@ const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
     cursor: zoom-in;
   }
   .photo-link:focus-visible {
-    outline: 3px solid var(--violet);
+    outline: 3px solid var(--green);
     outline-offset: -3px;
   }
   .photo :global(.photo-img) {
@@ -80,6 +80,10 @@ const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
   }
   .photo-link:hover :global(.photo-img) {
     transform: scale(1.03);
+  }
+  .photo-link:active :global(.photo-img) {
+    transform: scale(1.01);
+    opacity: 0.9;
   }
   .photo-cover {
     position: absolute;
@@ -94,13 +98,12 @@ const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
     position: absolute;
     right: 10px;
     bottom: 10px;
-    padding: 5px 11px;
+    padding: 4px 10px;
     color: #fff;
-    background: rgba(15, 14, 18, 0.74);
-    border-radius: 100px;
-    font-size: 0.72rem;
-    font-weight: 750;
-    backdrop-filter: blur(6px);
+    background: rgba(15, 14, 18, 0.82);
+    border-radius: var(--radius-s);
+    font-size: 0.8rem;
+    font-weight: 650;
   }
   @media (prefers-reduced-motion: reduce) {
     .photo :global(.photo-img) {
