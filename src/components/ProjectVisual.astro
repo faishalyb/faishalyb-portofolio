@@ -1,0 +1,117 @@
+---
+import { Image } from 'astro:assets';
+import { appScreens } from '../data/photos';
+
+interface Props {
+  type: 'face' | 'field' | 'harvest' | 'screens';
+}
+const { type } = Astro.props;
+---
+
+{type === 'screens' && (
+  <div class="project-visual visual-screens">
+    {appScreens.map((shot, index) => (
+      <Image
+        class={`screen screen-${index + 1}`}
+        src={shot.src}
+        alt={shot.alt}
+        widths={[240, 360, 480, 640]}
+        sizes="(max-width: 700px) 30vw, 230px"
+      />
+    ))}
+  </div>
+)}
+
+{type === 'face' && (
+  <div class="project-visual visual-rag" aria-hidden="true">
+    <div class="visual-head"><span>face_check.dart · offline</span><i></i></div>
+    <div class="rag-query"><span>Daily check-in · low-end Android</span><b>●</b></div>
+    <div class="rag-results">
+      <div><i>01</i><span><b>Detect &amp; align</b><small>ML Kit · 112 px</small></span></div>
+      <div><i>02</i><span><b>Liveness</b><small>MiniFASNet</small></span></div>
+      <div><i>03</i><span><b>Embed &amp; match</b><small>w600k_mbf · 512-d</small></span></div>
+    </div>
+    <div class="rag-score"><span>TAR @ FAR 1e-4</span><strong>99.1%</strong></div>
+  </div>
+)}
+
+{type === 'field' && (
+  <div class="project-visual visual-rag visual-ticket" aria-hidden="true">
+    <div class="visual-head"><span>bluetooth_printer · 58 mm</span><i></i></div>
+    <div class="ticket">
+      <strong>DO! IAM · HARVEST TICKET</strong>
+      <span>TICKET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TP-0412</span>
+      <span>BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C12</span>
+      <span>BUNCHES&nbsp;&nbsp;&nbsp;&nbsp;84</span>
+      <span>LOOSE FRUIT 12 kg</span>
+      <span>HARVESTER&nbsp;&nbsp;#017</span>
+      <div class="ticket-bars">{Array.from({ length: 34 }).map(() => <i></i>)}</div>
+    </div>
+    <div class="rag-score"><span>Phase 1 NFC → Phase 2 print</span><strong>3 groups</strong></div>
+  </div>
+)}
+
+{type === 'harvest' && (
+  <div class="project-visual visual-rag" aria-hidden="true">
+    <div class="visual-head"><span>epms · etis</span><i></i></div>
+    <div class="rag-query"><span>Estate, plasma and external users</span><b>↻</b></div>
+    <div class="rag-results">
+      <div><i>01</i><span><b>Planning &amp; harvest</b><small>ePMS · NFC</small></span></div>
+      <div><i>02</i><span><b>Inspection tasks</b><small>ePMS</small></span></div>
+      <div><i>03</i><span><b>Harvest order ticket</b><small>eTis · Firebase</small></span></div>
+    </div>
+    <div class="rag-score"><span>Released on Google Play</span><strong>2 apps</strong></div>
+  </div>
+)}
+
+<style>
+  .visual-ticket .ticket {
+    position: relative;
+    width: min(260px, 82%);
+    margin: 30px auto 0;
+    padding: 20px 18px 16px;
+    display: grid;
+    gap: 7px;
+    color: #1d1b17;
+    background: #f7f3ea;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: .64rem;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+    transform: rotate(-2deg);
+  }
+  .visual-ticket .ticket::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -8px;
+    left: 0;
+    height: 8px;
+    background: radial-gradient(circle at 5px -1px, transparent 5px, #f7f3ea 5.5px) repeat-x;
+    background-size: 10px 8px;
+  }
+  .visual-ticket .ticket strong { margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed #8b857a; font-size: .66rem; letter-spacing: .04em; }
+  .visual-ticket .ticket span { white-space: pre; }
+  .ticket-bars { display: flex; gap: 2px; height: 34px; margin-top: 8px; }
+  .ticket-bars i { display: block; height: 100%; background: #1d1b17; }
+  /* Bar widths come from the stylesheet: the page's CSP blocks inline style attributes. */
+  .ticket-bars i:nth-child(3n + 1) { width: 1px; }
+  .ticket-bars i:nth-child(3n + 2) { width: 2px; }
+  .ticket-bars i:nth-child(3n) { width: 3px; }
+
+  /* Real app screenshots: three phones, the middle one in front. Each phone gets a soft CSS shadow. */
+  .visual-screens {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .visual-screens :global(.screen) { flex: none; width: 30%; max-width: 250px; height: auto; filter: drop-shadow(0 22px 26px rgba(24, 30, 24, .3)); }
+  .visual-screens :global(.screen + .screen) { margin-left: -4%; }
+  .visual-screens :global(.screen-1) { transform: translateY(5%) rotate(-5deg); }
+  .visual-screens :global(.screen-2) { position: relative; z-index: 2; width: 34%; max-width: 280px; transform: translateY(-2%); }
+  .visual-screens :global(.screen-3) { transform: translateY(5%) rotate(5deg); }
+</style>

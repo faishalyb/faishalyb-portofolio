@@ -1,0 +1,113 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { Photo } from '../data/photos';
+
+interface Props {
+  photo: Photo;
+  /** `sizes` attribute for the responsive srcset. */
+  sizes?: string;
+  widths?: number[];
+  /** Opens the photo in the viewer. Photos that share a group can be paged through. */
+  group?: string;
+  /** Only in the viewer, not drawn on the page. Needs `group`. */
+  viewerOnly?: boolean;
+  /** Fill a positioned parent instead of keeping the photo's own proportions. */
+  cover?: boolean;
+  /** Corner badge with the number of photos in the viewer group, e.g. "4 photos". */
+  count?: number;
+  priority?: boolean;
+  class?: string;
+}
+
+const {
+  photo,
+  sizes = '100vw',
+  widths = [400, 640, 960, 1280],
+  group,
+  viewerOnly = false,
+  cover = false,
+  count = 0,
+  priority = false,
+  class: className,
+} = Astro.props;
+
+// Large version for the viewer. Also the link target, so the photo still opens without JavaScript.
+const full = group
+  ? await getImage({ src: photo.src, width: Math.min(1800, photo.src.width), format: 'webp', quality: 82 })
+  : undefined;
+// Rows of photos share one height; the ar-* class gives each photo a flex share equal to its aspect ratio.
+const shape = `ar-${Math.round((photo.src.width / photo.src.height) * 20)}`;
+---
+
+{group && viewerOnly ? (
+  <a class="photo-extra" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt} hidden></a>
+) : (
+  <div class:list={['photo', shape, { 'photo-cover': cover }, className]}>
+    {group ? (
+      <a class="photo-link" href={full?.src} data-lightbox={group} data-caption={photo.caption} data-alt={photo.alt}>
+        <Image src={photo.src} alt={photo.alt} widths={widths} sizes={sizes} class="photo-img" priority={priority} />
+        {count > 1 && <span class="photo-more" aria-hidden="true">{count} photos</span>}
+        {count > 1 && <span class="sr-only">, opens a viewer with {count} photos</span>}
+      </a>
+    ) : (
+      <Image src={photo.src} alt={photo.alt} widths={widths} sizes={sizes} class="photo-img" priority={priority} />
+    )}
+  </div>
+)}
+
+<style>
+  .photo {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .photo-link {
+    display: block;
+    height: 100%;
+    cursor: zoom-in;
+  }
+  .photo-link:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: -3px;
+  }
+  .photo :global(.photo-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 420ms ease;
+  }
+  .photo-link:hover :global(.photo-img) {
+    transform: scale(1.03);
+  }
+  .photo-cover {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+  }
+  .photo-cover :global(.photo-img) {
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-more {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 5px 11px;
+    color: #fff;
+    background: rgba(15, 14, 18, 0.74);
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 750;
+    backdrop-filter: blur(6px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .photo :global(.photo-img) {
+      transition: none;
+    }
+    .photo-link:hover :global(.photo-img) {
+      transform: none;
+    }
+  }
+</style>

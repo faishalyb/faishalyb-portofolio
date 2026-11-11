@@ -1,0 +1,12 @@
+{
+  "name": "Faishal Yusuf Baqir — Flutter Mobile Developer",
+  "short_name": "Faishal Y. Baqir",
+  "description": "Offline-first Flutter apps for palm oil plantations, with case studies and evidence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#f5f0e8",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

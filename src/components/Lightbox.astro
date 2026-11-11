@@ -1,0 +1,169 @@
+---
+import Icon from './Icon.astro';
+---
+
+<dialog class="lightbox" aria-label="Photo viewer" data-lightbox-dialog>
+  <button class="lb-btn lb-close" type="button" aria-label="Close photo viewer" data-lb-close><Icon name="close" size={20} /></button>
+  <button class="lb-btn lb-prev" type="button" aria-label="Previous photo" data-lb-prev><Icon name="arrow-right" size={20} /></button>
+  <figure class="lb-figure">
+    <img class="lb-img" alt="" data-lb-img />
+    <figcaption class="lb-caption" data-lb-caption></figcaption>
+  </figure>
+  <button class="lb-btn lb-next" type="button" aria-label="Next photo" data-lb-next><Icon name="arrow-right" size={20} /></button>
+</dialog>
+
+<script>
+  // Opens any <a data-lightbox="group"> in a native <dialog>; photos in the same group can be paged through.
+  const setupLightbox = () => {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+    const image = dialog?.querySelector<HTMLImageElement>('[data-lb-img]');
+    const caption = dialog?.querySelector<HTMLElement>('[data-lb-caption]');
+    const previous = dialog?.querySelector<HTMLButtonElement>('[data-lb-prev]');
+    const next = dialog?.querySelector<HTMLButtonElement>('[data-lb-next]');
+    const close = dialog?.querySelector<HTMLButtonElement>('[data-lb-close]');
+    if (!dialog || !image || !caption || !previous || !next || !close || dialog.dataset.ready) return;
+    dialog.dataset.ready = 'true';
+
+    let items: HTMLAnchorElement[] = [];
+    let index = 0;
+
+    const show = (target: number) => {
+      index = (target + items.length) % items.length;
+      const link = items[index];
+      image.src = link.href;
+      image.alt = link.dataset.alt ?? '';
+      caption.textContent = link.dataset.caption ?? '';
+      previous.hidden = next.hidden = items.length < 2;
+    };
+
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof Element)) return;
+      const link = event.target.closest<HTMLAnchorElement>('a[data-lightbox]');
+      if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+      items = [...document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]')].filter(
+        (item) => item.dataset.lightbox === link.dataset.lightbox,
+      );
+      show(items.indexOf(link));
+      dialog.showModal();
+    });
+
+    previous.addEventListener('click', () => show(index - 1));
+    next.addEventListener('click', () => show(index + 1));
+    close.addEventListener('click', () => dialog.close());
+    // Clicks on the empty area around the photo land on the dialog itself.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', (event) => {
+      if (items.length < 2) return;
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+    dialog.addEventListener('close', () => image.removeAttribute('src'));
+  };
+  setupLightbox();
+  document.addEventListener('astro:page-load', setupLightbox);
+</script>
+
+<style>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    background: rgba(10, 9, 13, 0.92);
+    border: 0;
+  }
+  .lightbox[open] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 60px 14px 30px;
+  }
+  .lightbox::backdrop {
+    background: transparent;
+  }
+  .lb-figure {
+    display: grid;
+    min-width: 0;
+    margin: 0;
+    justify-items: center;
+    gap: 14px;
+    pointer-events: none;
+  }
+  .lb-img {
+    width: auto;
+    height: auto;
+    max-width: min(100%, 1500px);
+    max-height: calc(100dvh - 170px);
+    object-fit: contain;
+    border-radius: 10px;
+    pointer-events: auto;
+  }
+  .lb-caption {
+    max-width: 640px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.88rem;
+    text-align: center;
+    pointer-events: auto;
+  }
+  .lb-btn {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 160ms ease;
+  }
+  .lb-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+  .lb-btn:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+  .lb-btn[hidden] {
+    display: none;
+  }
+  .lb-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+  }
+  .lb-prev :global(svg) {
+    transform: rotate(180deg);
+  }
+  :global(body:has(.lightbox[open])) {
+    overflow: hidden;
+  }
+  @media (max-width: 640px) {
+    .lightbox[open] {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 60px 10px 96px;
+    }
+    .lb-prev,
+    .lb-next {
+      position: absolute;
+      bottom: 26px;
+    }
+    .lb-prev {
+      left: calc(50% - 58px);
+    }
+    .lb-next {
+      right: calc(50% - 58px);
+    }
+  }
+</style>

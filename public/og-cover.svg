@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f5f0e8"/>
+  <circle cx="1080" cy="80" r="210" fill="#1f7a52" opacity=".12"/>
+  <rect x="72" y="72" width="64" height="64" rx="18" fill="#16151b"/>
+  <circle cx="121" cy="87" r="8" fill="#e9a23b"/>
+  <path d="M90 86h26v9h-16v7h14v9h-14v11H90V86Z" fill="#f5f0e8"/>
+  <text x="156" y="113" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#16151b">Faishal Yusuf Baqir</text>
+  <text x="72" y="270" font-family="Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="700" fill="#16151b" letter-spacing="-2">I build apps that work</text>
+  <text x="72" y="360" font-family="Georgia, serif" font-size="78" font-style="italic" fill="#16151b">where the signal <tspan fill="#1f7a52">doesn’t.</tspan></text>
+  <text x="72" y="450" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" fill="#5f5a57">Flutter Mobile Developer · Offline-first plantation apps · On-device ML</text>
+  <g font-family="Helvetica Neue, Arial, sans-serif">
+    <rect x="72" y="500" width="250" height="64" rx="32" fill="#16151b"/>
+    <text x="197" y="540" text-anchor="middle" font-size="24" font-weight="700" fill="#f5f0e8">99.1% TAR @ 1e-4</text>
+    <rect x="338" y="500" width="200" height="64" rx="32" fill="none" stroke="#16151b" stroke-opacity=".25" stroke-width="2"/>
+    <text x="438" y="540" text-anchor="middle" font-size="24" font-weight="700" fill="#16151b">6.9 MB model</text>
+    <rect x="554" y="500" width="260" height="64" rx="32" fill="none" stroke="#16151b" stroke-opacity=".25" stroke-width="2"/>
+    <text x="684" y="540" text-anchor="middle" font-size="24" font-weight="700" fill="#16151b">NFC · Thermal print</text>
+  </g>
+</svg>

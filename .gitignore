@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.tmp-chrome*/
+.tmp-verify-shots/
+
+# Original photos (large, with EXIF/GPS). Web copies live in src/assets/photos — run `npm run photos` to rebuild them.
+/assets/
