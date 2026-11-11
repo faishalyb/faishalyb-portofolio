@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f5f0e8"/>
-  <text x="72" y="118" font-family="Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="700" fill="#16151b">Faishal Yusuf Baqir</text>
-  <text x="72" y="290" font-family="Helvetica Neue, Arial, sans-serif" font-size="84" font-weight="700" fill="#16151b" letter-spacing="-2.5">I build apps that work</text>
-  <text x="72" y="388" font-family="Georgia, serif" font-size="84" font-style="italic" fill="#1a6846">where the signal doesn’t.</text>
-  <rect x="757" y="404" width="296" height="8" fill="#e2832a"/>
-  <line x1="72" y1="486" x2="1128" y2="486" stroke="#16151b" stroke-opacity=".34" stroke-width="3" stroke-dasharray="12 10"/>
-  <text x="72" y="546" font-family="Menlo, Consolas, monospace" font-size="27" fill="#5c5653">Flutter mobile developer · offline-first field apps · Jakarta</text>
-</svg>

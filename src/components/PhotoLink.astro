@@ -1,0 +1,73 @@
+---
+/**
+ * A photo that opens in the viewer (Viewer.astro). Photos that share a `group` can be paged through.
+ * The link points at the large file, so it still opens without JavaScript.
+ */
+import { Image, getImage } from 'astro:assets';
+import type { Photo } from '../data/photos';
+
+interface Props {
+  photo: Photo;
+  group: string;
+  sizes?: string;
+  widths?: number[];
+  /** Only in the viewer, not drawn on the page. */
+  viewerOnly?: boolean;
+  /** Number of photos in the group, shown as a corner tag when above 1. */
+  count?: number;
+  priority?: boolean;
+  class?: string;
+}
+
+const { photo, group, sizes = '100vw', widths = [400, 640, 960, 1280], viewerOnly = false, count = 0, priority = false, class: className } = Astro.props;
+
+const full = await getImage({ src: photo.src, width: Math.min(1800, photo.src.width), format: 'webp', quality: 82 });
+const data = {
+  'data-viewer': group,
+  'data-caption': photo.caption,
+  'data-alt': photo.alt,
+  'data-w': full.attributes.width,
+  'data-h': full.attributes.height,
+};
+---
+
+{viewerOnly ? (
+  <a href={full.src} hidden tabindex="-1" {...data}></a>
+) : (
+  <a class:list={['photo-link', className]} href={full.src} {...data}>
+    <Image src={photo.src} alt={photo.alt} widths={widths} sizes={sizes} priority={priority} class="photo-img" />
+    {count > 1 && <span class="photo-count mono" aria-hidden="true">{count} photos</span>}
+    <span class="sr-only">{count > 1 ? `, opens a viewer with ${count} photos` : ', opens the photo viewer'}</span>
+  </a>
+)}
+
+<style>
+  .photo-link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--panel);
+    border-radius: var(--radius-l);
+  }
+  .photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .photo-link:hover .photo-img {
+    transform: scale(1.03);
+  }
+  .photo-link:active .photo-img {
+    transform: scale(1.01);
+  }
+  .photo-count {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    padding: 4px 10px;
+    color: var(--on-fruit);
+    background: #fff;
+    border-radius: var(--radius-s);
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+import Icon from './Icon.astro';
+import { profile, socialLinks } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer on-canopy">
+  <div class="shell foot">
+    <p class="foot-name">{profile.name}<span>{profile.role} · {profile.location}</span></p>
+    <ul class="foot-links">
+      <li><a href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={16} /></a></li>
+      <li><a href={profile.portfolioPdf} target="_blank" rel="noopener">Portfolio (PDF) <Icon name="download" size={16} /></a></li>
+      {socialLinks.map((link) => (
+        <li><a href={link.href} target="_blank" rel="noopener">{link.label} <Icon name="out" size={16} /></a></li>
+      ))}
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+    <p class="mono foot-copy">© {year} {profile.name}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--canopy-deep);
+  }
+  .foot {
+    display: grid;
+    gap: 22px;
+    padding-block: 40px;
+  }
+  .foot-name {
+    display: grid;
+    font-size: 1.35rem;
+    font-stretch: 80%;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .foot-name span {
+    color: var(--on-canopy-muted);
+    font-size: 0.95rem;
+    font-stretch: 100%;
+    font-weight: 400;
+  }
+  .foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 22px;
+  }
+  .foot-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    color: var(--on-canopy-muted);
+    font-weight: 550;
+  }
+  .foot-links a:hover {
+    color: var(--on-canopy);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+  .foot-links a:active {
+    opacity: 0.7;
+  }
+  .foot-copy {
+    color: var(--on-canopy-muted);
+  }
+  @media (min-width: 900px) {
+    .foot {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    .foot-links {
+      justify-content: flex-end;
+    }
+  }
+</style>

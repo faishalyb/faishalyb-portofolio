@@ -1,0 +1,222 @@
+---
+import Icon from './Icon.astro';
+import { profile } from '../data/site';
+
+// Every item points at a section that exists on the home page (R-24).
+const isHome = Astro.url.pathname === '/';
+const nav = [
+  { label: 'Work', id: 'work' },
+  { label: 'Experience', id: 'experience' },
+  { label: 'Writing', id: 'writing' },
+  { label: 'Contact', id: 'contact' },
+].map((item) => ({ ...item, href: `${isHome ? '' : '/'}#${item.id}` }));
+---
+
+<header class="site-header on-canopy" data-header>
+  <div class="bar shell">
+    <a class="wordmark" href="/" aria-label={`${profile.name}, home`}>
+      <span>{profile.name}</span>
+    </a>
+
+    <nav class="nav-desktop" aria-label="Main">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+
+    <div class="actions">
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Use dark theme">
+        <span class="when-light"><Icon name="moon" size={19} /></span>
+        <span class="when-dark"><Icon name="sun" size={19} /></span>
+      </button>
+      <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu-panel" aria-label="Open menu">
+        <span class="when-closed"><Icon name="menu" /></span>
+        <span class="when-open"><Icon name="close" /></span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="menu-panel" id="menu-panel" aria-label="Main, mobile" data-menu-panel hidden>
+    <ul class="shell">
+      {nav.map((item, i) => (
+        <li><a href={item.href}><span class="mono" aria-hidden="true">0{i + 1}</span>{item.label}</a></li>
+      ))}
+      <li class="menu-resume">
+        <a class="btn btn-fruit" href={profile.resume} target="_blank" rel="noopener">Download résumé (PDF) <Icon name="download" size={18} /></a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const menuBtn = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+  const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+  // Theme: follows the system until the visitor picks one; the choice is remembered.
+  const syncThemeLabel = () => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    themeBtn?.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');
+  };
+  syncThemeLabel();
+  themeBtn?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* Storage can be blocked; the theme still switches for this visit. */
+    }
+    syncThemeLabel();
+  });
+
+  // Mobile menu: a disclosure. Escape, a link click or a wide screen closes it.
+  const setMenu = (open: boolean) => {
+    if (!menuBtn || !panel || !header) return;
+    panel.hidden = !open;
+    header.classList.toggle('menu-open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  menuBtn?.addEventListener('click', () => setMenu(panel?.hidden ?? false));
+  panel?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && panel && !panel.hidden) {
+      setMenu(false);
+      menuBtn?.focus();
+    }
+  });
+  matchMedia('(min-width: 860px)').addEventListener('change', (event) => {
+    if (event.matches) setMenu(false);
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    z-index: 50;
+    top: 0;
+    border-bottom: 1px solid var(--canopy-line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    height: var(--header);
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 1.22rem;
+    font-stretch: 80%;
+    font-weight: 800;
+    letter-spacing: 0.005em;
+  }
+  .wordmark:hover span {
+    text-decoration: underline;
+    text-decoration-color: var(--fruit);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+  }
+  .nav-desktop {
+    display: none;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .nav-desktop a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 14px;
+    color: var(--on-canopy-muted);
+    border-radius: var(--radius-m);
+    font-weight: 550;
+    transition: color 140ms ease, background-color 140ms ease;
+  }
+  .nav-desktop a:hover {
+    color: var(--on-canopy);
+    background: rgba(238, 242, 234, 0.08);
+  }
+  .nav-desktop a:active {
+    background: rgba(238, 242, 234, 0.16);
+  }
+  .actions {
+    display: flex;
+    gap: 6px;
+  }
+  .icon-btn {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: var(--on-canopy);
+    border: 1px solid var(--canopy-line);
+    border-radius: 50%;
+    transition: background-color 140ms ease, border-color 140ms ease;
+  }
+  .icon-btn:hover {
+    background: rgba(238, 242, 234, 0.1);
+    border-color: rgba(238, 242, 234, 0.5);
+  }
+  .icon-btn:active {
+    background: rgba(238, 242, 234, 0.2);
+  }
+  .when-dark,
+  .when-open {
+    display: none;
+  }
+  :global([data-theme='dark']) .when-light {
+    display: none;
+  }
+  :global([data-theme='dark']) .when-dark {
+    display: block;
+  }
+  .menu-open .when-closed {
+    display: none;
+  }
+  .menu-open .when-open {
+    display: block;
+  }
+
+  .menu-panel {
+    border-top: 1px solid var(--canopy-line);
+  }
+  .menu-panel ul {
+    display: grid;
+    padding-block: 8px 24px;
+  }
+  .menu-panel li:not(.menu-resume) a {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-block: 12px;
+    border-bottom: 1px solid var(--canopy-line);
+    font-size: 2rem;
+    font-stretch: 78%;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .menu-panel .mono {
+    color: var(--on-canopy-muted);
+  }
+  .menu-panel a:active {
+    opacity: 0.75;
+  }
+  .menu-resume {
+    margin-top: 20px;
+  }
+  .menu-resume .btn {
+    width: 100%;
+  }
+
+  @media (min-width: 860px) {
+    .nav-desktop {
+      display: flex;
+    }
+    .menu-btn,
+    .menu-panel {
+      display: none;
+    }
+  }
+</style>

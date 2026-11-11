@@ -1,0 +1,89 @@
+<!doctype html>
+<!--
+  Source for public/og-cover.png (the 1200 x 630 social share image).
+  Rebuild with: npm run og   (renders this page in headless Chrome)
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Share image</title>
+    <style>
+      @font-face {
+        font-family: 'Archivo';
+        src: url('../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2-variations');
+        font-weight: 100 900;
+        font-stretch: 62% 125%;
+      }
+      @font-face {
+        font-family: 'Plex Mono';
+        src: url('../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+      }
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: 64px 72px 56px;
+        color: #eef2ea;
+        background: #0f3526;
+        font-family: 'Archivo', sans-serif;
+      }
+      .name {
+        font-size: 34px;
+        font-stretch: 80%;
+        font-weight: 800;
+      }
+      h1 {
+        align-self: center;
+        max-width: 980px;
+        font-size: 104px;
+        font-stretch: 76%;
+        font-weight: 800;
+        line-height: 0.95;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .mark {
+        padding: 0 8px;
+        color: #0e1d16;
+        background: #f25a2b;
+      }
+      svg {
+        display: inline-block;
+        width: 72px;
+        margin-left: 18px;
+        fill: none;
+        stroke: #b3c3b8;
+        stroke-width: 2.6;
+      }
+      .foot {
+        padding-top: 22px;
+        color: #b3c3b8;
+        border-top: 1px solid rgba(238, 242, 234, 0.2);
+        font-family: 'Plex Mono', monospace;
+        font-size: 26px;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="name">Faishal Yusuf Baqir</p>
+    <h1>
+      I build Flutter apps for places with <span class="nowrap"><span class="mark">no signal.</span><svg viewBox="0 0 44 36" aria-hidden="true">
+        <rect x="2" y="25" width="7" height="9" />
+        <rect x="13" y="18" width="7" height="16" />
+        <rect x="24" y="10" width="7" height="24" />
+        <rect x="35" y="2" width="7" height="32" />
+      </svg></span>
+    </h1>
+    <p class="foot">Flutter mobile developer · offline-first field apps · Jakarta</p>
+  </body>
+</html>

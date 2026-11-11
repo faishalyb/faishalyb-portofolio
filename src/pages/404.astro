@@ -1,25 +1,40 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import Base from '../layouts/Base.astro';
+import SignalMeter from '../components/SignalMeter.astro';
+import { profile } from '../data/site';
 ---
 
-<BaseLayout title="Page not found · Faishal Yusuf Baqir" description="This page could not be found." noindex>
-  <section class="not-found shell">
-    <span class="label">Error 404</span>
-    <h1>This page is <em>out of coverage.</em></h1>
-    <p>The address may be mistyped, or the page has moved. The rest of the portfolio is where you left it.</p>
-    <a class="btn btn-primary" href="/">Back to the home page</a>
+<Base title={`Page not found · ${profile.name}`} description="This page could not be found." noindex>
+  <section class="lost on-canopy">
+    <div class="shell">
+      <p class="index"><b>404</b> Page not found</p>
+      <h1>No signal on this <span class="nowrap">page.<SignalMeter class="lost-meter" /></span></h1>
+      <p>The address may be mistyped, or the page has moved. Everything else is where you left it.</p>
+      <a class="btn btn-fruit" href="/">Back to the home page</a>
+    </div>
   </section>
-</BaseLayout>
+</Base>
 
 <style>
-  .not-found {
+  .lost {
+    padding-block: clamp(72px, 14vw, 160px);
+  }
+  .lost .shell {
     display: grid;
     justify-items: start;
-    gap: 20px;
-    padding-block: clamp(64px, 12vw, 140px);
+    gap: 24px;
   }
-  .not-found p {
+  .lost h1 {
+    max-width: 12ch;
+  }
+  .lost :global(.lost-meter) {
+    width: 0.62em;
+    margin-left: 0.22em;
+    color: var(--on-canopy-muted);
+  }
+  .lost p:not(.index) {
     max-width: 48ch;
-    color: var(--muted);
+    color: var(--on-canopy-muted);
+    font-size: 1.1rem;
   }
 </style>

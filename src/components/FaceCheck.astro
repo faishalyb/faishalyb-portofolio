@@ -1,0 +1,277 @@
+---
+/**
+ * How a face check runs in DO! IAM, from src/data/site.ts (faceCheck). The three modes are tabs.
+ * Without JavaScript the tab row stays hidden and all three modes are listed one after another.
+ */
+import { faceCheck } from '../data/site';
+
+interface Props {
+  index?: string;
+}
+const { index = '02' } = Astro.props;
+---
+
+<section class="fc on-canopy" id="face-check" aria-labelledby="fc-title">
+  <div class="shell fc-inner">
+    <div class="fc-head" data-reveal>
+      <p class="index"><b>{index}</b> Inside a face check</p>
+      <h2 id="fc-title">Four steps on the phone. No network in the loop.</h2>
+      <p class="fc-lede">This is the check DO! IAM runs when a plantation worker checks in for the day. Every step runs on a low-end Android phone, so it works in the middle of an estate with no signal.</p>
+    </div>
+
+    <ol class="fc-steps" data-reveal>
+      {faceCheck.steps.map((step, i) => (
+        <li>
+          <span class="mono">Step {i + 1}</span>
+          <strong>{step.name}</strong>
+          <span class="fc-detail">{step.detail}</span>
+        </li>
+      ))}
+    </ol>
+
+    <div class="fc-modes" data-reveal data-tabs>
+      <div class="fc-tabs" role="tablist" aria-label="Face check modes" hidden data-tablist>
+        {faceCheck.modes.map((mode, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`fc-tab-${mode.id}`}
+            aria-controls={`fc-panel-${mode.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+      {faceCheck.modes.map((mode) => (
+        <div class="fc-panel" role="tabpanel" id={`fc-panel-${mode.id}`} aria-labelledby={`fc-tab-${mode.id}`} data-panel>
+          <p class="fc-panel-name">{mode.label}</p>
+          <p class="fc-threshold"><b>{mode.threshold}</b><span class="mono">cosine similarity threshold</span></p>
+          <p class="fc-rule">Rule: {mode.rule}.</p>
+        </div>
+      ))}
+    </div>
+
+    <dl class="fc-facts" data-reveal>
+      {faceCheck.facts.map((fact) => (
+        <div><dt class="mono">{fact.name}</dt><dd>{fact.detail}</dd></div>
+      ))}
+      <div class="fc-total">
+        <dt class="mono">{faceCheck.total.label}</dt>
+        <dd>{faceCheck.total.value}<span class="mono">{faceCheck.total.source}</span></dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tablist = root.querySelector<HTMLElement>('[data-tablist]');
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+    if (!tablist || !tabs.length) return;
+
+    const select = (i: number, focus = false) => {
+      tabs.forEach((tab, n) => {
+        tab.setAttribute('aria-selected', String(n === i));
+        tab.tabIndex = n === i ? 0 : -1;
+      });
+      panels.forEach((panel, n) => (panel.hidden = n !== i));
+      if (focus) tabs[i].focus();
+    };
+
+    tablist.hidden = false;
+    root.classList.add('is-tabbed');
+    select(0);
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i));
+      tab.addEventListener('keydown', (event) => {
+        const last = tabs.length - 1;
+        const moves: Record<string, number> = { ArrowRight: i === last ? 0 : i + 1, ArrowLeft: i === 0 ? last : i - 1, Home: 0, End: last };
+        if (event.key in moves) {
+          event.preventDefault();
+          select(moves[event.key], true);
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .fc {
+    padding-block: clamp(72px, 10vw, 128px);
+  }
+  .fc-inner {
+    display: grid;
+    gap: 40px;
+  }
+  .fc-head {
+    display: grid;
+    gap: 18px;
+    max-width: 820px;
+  }
+  .fc-lede {
+    max-width: 60ch;
+    color: var(--on-canopy-muted);
+    font-size: 1.1rem;
+  }
+
+  .fc-steps {
+    display: grid;
+    border-top: 1px solid var(--canopy-line);
+  }
+  .fc-steps li {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    align-items: baseline;
+    gap: 2px 16px;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--canopy-line);
+  }
+  .fc-steps .mono {
+    grid-row: span 2;
+    color: var(--on-canopy-muted);
+  }
+  .fc-steps strong {
+    font-size: 2rem;
+    font-stretch: 78%;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+  .fc-detail {
+    color: var(--on-canopy-muted);
+  }
+  @media (min-width: 900px) {
+    .fc-steps {
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--canopy-line);
+    }
+    .fc-steps li {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 22px 22px 26px 0;
+      border-bottom: 0;
+    }
+    .fc-steps li + li {
+      padding-left: 22px;
+      border-left: 1px solid var(--canopy-line);
+    }
+    .fc-steps .mono {
+      grid-row: auto;
+    }
+    .fc-steps strong {
+      font-size: 2.6rem;
+    }
+  }
+
+  .fc-modes {
+    display: grid;
+    gap: 14px;
+  }
+  .fc-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fc-tabs button {
+    min-height: 46px;
+    padding: 10px 18px;
+    color: var(--on-canopy);
+    border: 1.5px solid rgba(238, 242, 234, 0.4);
+    border-radius: var(--radius-m);
+    font-weight: 600;
+    transition: background-color 140ms ease, border-color 140ms ease;
+  }
+  .fc-tabs button:hover {
+    border-color: var(--on-canopy);
+    background: rgba(238, 242, 234, 0.08);
+  }
+  /* The selected mode is this band's one accent */
+  .fc-tabs button[aria-selected='true'] {
+    color: var(--on-fruit);
+    background: var(--fruit);
+    border-color: var(--fruit);
+  }
+  .fc-panel {
+    display: grid;
+    gap: 8px;
+    padding: clamp(20px, 3vw, 32px);
+    background: rgba(238, 242, 234, 0.06);
+    border: 1px solid var(--canopy-line);
+    border-radius: var(--radius-l);
+  }
+  .is-tabbed .fc-panel-name {
+    display: none;
+  }
+  .fc-panel-name {
+    font-weight: 650;
+  }
+  .fc-threshold {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 18px;
+  }
+  .fc-threshold b {
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 0.9;
+  }
+  .fc-threshold .mono,
+  .fc-rule {
+    color: var(--on-canopy-muted);
+  }
+  .fc-rule {
+    font-size: 1.1rem;
+  }
+
+  .fc-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    padding-top: 26px;
+    border-top: 1px dashed var(--canopy-line);
+  }
+  .fc-facts dt {
+    color: var(--on-canopy-muted);
+  }
+  .fc-facts dd {
+    font-size: 1.5rem;
+    font-stretch: 80%;
+    font-weight: 800;
+  }
+  .fc-total {
+    grid-column: 1 / -1;
+  }
+  .fc-total dd {
+    display: grid;
+    font-size: clamp(3rem, 8vw, 4.6rem);
+    line-height: 1;
+  }
+  .fc-total dd .mono {
+    margin-top: 8px;
+    color: var(--on-canopy-muted);
+    font-stretch: 100%;
+    font-weight: 400;
+  }
+  @media (min-width: 900px) {
+    .fc-inner {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 64px;
+    }
+    .fc-head,
+    .fc-steps {
+      grid-column: 1 / -1;
+    }
+    .fc-facts {
+      grid-template-columns: 1fr 1fr;
+      align-content: start;
+      padding-top: 0;
+      padding-left: 40px;
+      border-top: 0;
+      border-left: 1px dashed var(--canopy-line);
+    }
+  }
+</style>

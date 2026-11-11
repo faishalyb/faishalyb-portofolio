@@ -1,7 +1,6 @@
 # Faishal Yusuf Baqir · Portfolio
 
-Personal portfolio built with [Astro](https://astro.build), based on the MIT-licensed
-[LatentFolio Free](https://github.com/Dharani-Eswaramurthi/latentfolio) template by Dharani Eswaramurthi.
+Personal portfolio of Faishal Yusuf Baqir, Flutter mobile developer. A static site built with [Astro](https://astro.build).
 
 ## Run locally
 
@@ -18,18 +17,18 @@ npm run preview  # serve the built site
 
 | What | File |
 |---|---|
-| Profile, projects, experience, publications | `src/data/site.ts` |
-| Home page sections | `src/pages/index.astro` |
+| Profile, case studies, experience, publications, readouts | `src/data/site.ts` |
+| Photos (alt text, captions) and company logos | `src/data/photos.ts` |
+| Home page | `src/pages/index.astro` |
 | Case study pages (`/work/<slug>`) | `src/pages/work/[slug].astro` |
-| Project card visuals | `src/components/ProjectVisual.astro` |
-| Hero receipt (how a face check runs) | `src/components/Receipt.astro` |
-| Design direction: palette, type, shape, motion | `DESIGN.md` |
+| Page shell: meta tags, structured data, theme | `src/layouts/Base.astro` |
+| Evidence next to each case study (chart, phases, apps, screenshots) | `src/components/CaseVisual.astro` |
+| Interactive face check band | `src/components/FaceCheck.astro` |
+| Photo viewer and photo link | `src/components/Viewer.astro`, `src/components/PhotoLink.astro` |
+| Design direction: palette, type, motif, motion | `DESIGN.md` |
 | Colour and type tokens | `src/styles/global.css` |
-| antislop audit and follow-up report | `anti-slop/` |
 | CV and portfolio PDFs | `public/faishal-yusuf-baqir-cv.pdf`, `public/faishal-yusuf-baqir-portfolio.pdf` |
-| Social share image | `public/og-cover.svg` → `public/og-cover.png` |
-| Photos (text, alt, captions) | `src/data/photos.ts` |
-| Photo viewer and photo component | `src/components/Lightbox.astro`, `src/components/Photo.astro` |
+| Social share image | `scripts/og-cover.html` → `public/og-cover.png` (`npm run og`, needs Google Chrome) |
 
 To add a case study, add an entry to `caseStudies` in `src/data/site.ts`; its page is generated automatically.
 
@@ -37,14 +36,14 @@ To add a case study, add an entry to `caseStudies` in `src/data/site.ts`; its pa
 
 Originals live in `assets/` and are **git-ignored**: they are large and carry EXIF data (one of them even had GPS).
 `npm run photos` turns them into web-ready copies in `src/assets/photos` (cropped, resized, EXIF removed), and those
-copies are what gets committed. Astro then builds the responsive WebP sizes at build time.
+copies are what gets committed. Astro builds the responsive WebP sizes at build time.
 
 To add or change a photo:
 
 1. Put the original in `assets/`.
 2. Add or edit its line in `scripts/prepare-photos.mjs` (output name, optional crop, longest edge).
 3. Run `npm run photos`.
-4. Import it in `src/data/photos.ts` with alt text and a caption, then use it with `<Photo>` (opens in the viewer) or `<Image>`.
+4. Import it in `src/data/photos.ts` with alt text and a caption, then show it with `<PhotoLink>` (opens in the viewer) or `<Image>`.
 
 `.heic` files are converted with macOS `sips`; on another system export them to JPEG first.
 
@@ -55,4 +54,5 @@ On Vercel: import the repository, keep the Astro defaults, and set `SITE_URL` to
 
 ## License
 
-Template code: MIT (see `LICENSE`). Third-party notices: `THIRD_PARTY_NOTICES.md`.
+Source code: MIT (see `LICENSE`). Written content, photos, logos and PDFs are not covered by that license.
+Third-party notices: `THIRD_PARTY_NOTICES.md`.

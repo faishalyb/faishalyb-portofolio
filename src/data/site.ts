@@ -5,13 +5,6 @@
  * measurements recorded during the projects; keep them in sync with the CV.
  */
 
-export const template = {
-  name: 'LatentFolio',
-  edition: 'Free',
-  creator: 'Dharani Eswaramurthi',
-  creatorUrl: 'https://github.com/Dharani-Eswaramurthi',
-};
-
 export const profile = {
   name: 'Faishal Yusuf Baqir',
   shortName: 'Faishal',
@@ -33,6 +26,8 @@ export const socialLinks = [
 ];
 
 export const pageCopy = {
+  /** The hero headline. `mark` gets the accent marker and the empty signal meter. */
+  heroTitle: { lead: 'I build Flutter apps for places with', mark: 'no signal.' },
   seoTitle: `${profile.name} · ${profile.role}`,
   seoDescription: `${profile.role} in Jakarta. Offline-first Flutter apps for palm oil plantations: on-device face recognition, NFC, Bluetooth thermal printing and SQLite sync.`,
   heroSummary: 'Offline-first Flutter apps for palm oil plantations: on-device face recognition, NFC tags, printed tickets and local sync. Harvesters, supervisors and field assistants use them every day.',

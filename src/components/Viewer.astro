@@ -1,0 +1,189 @@
+---
+/**
+ * Photo viewer. A native <dialog>: Escape closes it and focus stays inside while it is open.
+ * Arrow keys page through the group. Shows a loading state and an error state for each photo.
+ */
+import Icon from './Icon.astro';
+---
+
+<dialog class="viewer" data-viewer-dialog aria-label="Photo viewer">
+  <div class="viewer-top">
+    <p class="mono viewer-count" data-viewer-count aria-live="polite"></p>
+    <button class="viewer-btn" type="button" data-viewer-close aria-label="Close photo viewer"><Icon name="close" /></button>
+  </div>
+  <figure class="viewer-figure">
+    <div class="viewer-stage">
+      <p class="viewer-state mono" data-viewer-loading>Loading photo…</p>
+      <p class="viewer-state viewer-error" data-viewer-error hidden>
+        This photo did not load. <a data-viewer-direct href="#">Open the file directly</a>
+      </p>
+      <img data-viewer-img alt="" />
+    </div>
+    <figcaption data-viewer-caption></figcaption>
+  </figure>
+  <div class="viewer-nav" data-viewer-nav>
+    <button class="viewer-btn" type="button" data-viewer-prev aria-label="Previous photo"><Icon name="prev" /></button>
+    <button class="viewer-btn" type="button" data-viewer-next aria-label="Next photo"><Icon name="next" /></button>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-viewer-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    const img = dialog.querySelector<HTMLImageElement>('[data-viewer-img]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-viewer-caption]')!;
+    const count = dialog.querySelector<HTMLElement>('[data-viewer-count]')!;
+    const loading = dialog.querySelector<HTMLElement>('[data-viewer-loading]')!;
+    const error = dialog.querySelector<HTMLElement>('[data-viewer-error]')!;
+    const direct = dialog.querySelector<HTMLAnchorElement>('[data-viewer-direct]')!;
+    const nav = dialog.querySelector<HTMLElement>('[data-viewer-nav]')!;
+    const prev = dialog.querySelector<HTMLButtonElement>('[data-viewer-prev]')!;
+    const next = dialog.querySelector<HTMLButtonElement>('[data-viewer-next]')!;
+    let items: HTMLAnchorElement[] = [];
+    let index = 0;
+    let opener: HTMLElement | null = null;
+
+    const show = (i: number) => {
+      index = (i + items.length) % items.length;
+      const item = items[index];
+      loading.hidden = false;
+      error.hidden = true;
+      img.hidden = true;
+      img.width = Number(item.dataset.w) || 0;
+      img.height = Number(item.dataset.h) || 0;
+      img.alt = item.dataset.alt ?? '';
+      img.src = item.href;
+      direct.href = item.href;
+      caption.textContent = item.dataset.caption ?? '';
+      count.textContent = items.length > 1 ? `${index + 1} / ${items.length}` : '';
+      nav.hidden = items.length < 2;
+    };
+
+    img.addEventListener('load', () => {
+      loading.hidden = true;
+      img.hidden = false;
+    });
+    img.addEventListener('error', () => {
+      loading.hidden = true;
+      error.hidden = false;
+    });
+
+    document.querySelectorAll<HTMLAnchorElement>('a[data-viewer]:not([hidden])').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        opener = link;
+        items = [...document.querySelectorAll<HTMLAnchorElement>(`a[data-viewer="${link.dataset.viewer}"]`)];
+        show(items.indexOf(link));
+        dialog.showModal();
+      });
+    });
+
+    prev.addEventListener('click', () => show(index - 1));
+    next.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-viewer-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('keydown', (event) => {
+      if (items.length < 2) return;
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+    // A click on the backdrop (outside the content) closes it.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      img.removeAttribute('src');
+      opener?.focus();
+    });
+  }
+</script>
+
+<style>
+  .viewer {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0;
+    color: #eef2ea;
+    background: rgba(6, 16, 11, 0.94);
+    border: 0;
+  }
+  .viewer[open] {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .viewer::backdrop {
+    background: rgba(6, 16, 11, 0.7);
+  }
+  .viewer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+  .viewer-count {
+    color: #b3c3b8;
+  }
+  .viewer-figure {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 0;
+    gap: 12px;
+    padding-inline: 16px;
+  }
+  .viewer-stage {
+    position: relative;
+    display: grid;
+    min-height: 0;
+    place-items: center;
+  }
+  .viewer-stage img {
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: var(--lift);
+  }
+  .viewer-state {
+    color: #b3c3b8;
+  }
+  .viewer-error {
+    font-family: var(--font-sans);
+  }
+  .viewer-error a {
+    color: #eef2ea;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .viewer-figure figcaption {
+    min-height: 1.6em;
+    color: #d6dfd8;
+    text-align: center;
+  }
+  .viewer-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 16px 22px;
+  }
+  .viewer-btn {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    color: #eef2ea;
+    border: 1px solid rgba(238, 242, 234, 0.35);
+    border-radius: 50%;
+    transition: background-color 140ms ease;
+  }
+  .viewer-btn:hover {
+    background: rgba(238, 242, 234, 0.12);
+  }
+  .viewer-btn:active {
+    background: rgba(238, 242, 234, 0.24);
+  }
+  .viewer :focus-visible {
+    outline-color: #ff7447;
+  }
+</style>

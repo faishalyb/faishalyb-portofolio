@@ -1,0 +1,133 @@
+---
+import { getImage } from 'astro:assets';
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Viewer from '../components/Viewer.astro';
+import { avatar } from '../data/photos';
+import { profile, socialLinks } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+}
+
+const {
+  title = `${profile.name} · ${profile.role}`,
+  description = profile.bio,
+  image = '/og-cover.png',
+  imageAlt = `${profile.name}, ${profile.role}`,
+  type = 'website',
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+const siteUrl = new URL('/', Astro.site).toString();
+const personPhoto = await getImage({ src: avatar.src, width: 512, format: 'jpg' });
+const personId = new URL('/#person', Astro.site).toString();
+const person = {
+  '@type': 'Person',
+  '@id': personId,
+  name: profile.name,
+  jobTitle: profile.role,
+  description: profile.bio,
+  url: siteUrl,
+  image: new URL(personPhoto.src, Astro.site).toString(),
+  email: `mailto:${profile.email}`,
+  sameAs: socialLinks.map((link) => link.href),
+  worksFor: { '@type': 'Organization', name: profile.company },
+  homeLocation: { '@type': 'Place', name: profile.location },
+  knowsAbout: ['Flutter', 'Mobile development', 'Offline-first apps', 'On-device machine learning', 'Face recognition', 'TensorFlow Lite', 'NFC', 'SQLite'],
+};
+const jsonLd = noindex
+  ? []
+  : [
+      { '@context': 'https://schema.org', '@type': 'WebSite', '@id': new URL('/#website', Astro.site).toString(), name: `${profile.name} · Portfolio`, url: siteUrl, inLanguage: 'en', author: { '@id': personId } },
+      Astro.url.pathname === '/'
+        ? { '@context': 'https://schema.org', '@type': 'ProfilePage', name: title, description, url: siteUrl, mainEntity: person }
+        : { '@context': 'https://schema.org', ...person },
+    ];
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      document.documentElement.classList.add('has-js');
+      (function () {
+        var system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch (e) {}
+        document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : system;
+      })();
+    </script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0f3526" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large'} />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={`${profile.name} · Portfolio`} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    {jsonLd.map((entry) => <script is:inline type="application/ld+json" set:html={JSON.stringify(entry)} />)}
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+    <Viewer />
+
+    <script>
+      // Blocks marked data-reveal rise once when they enter the viewport.
+      const blocks = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -40px' },
+        );
+        blocks.forEach((block) => observer.observe(block));
+      } else {
+        blocks.forEach((block) => block.classList.add('is-visible'));
+      }
+    </script>
+  </body>
+</html>

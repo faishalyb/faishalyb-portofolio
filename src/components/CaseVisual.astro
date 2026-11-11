@@ -1,0 +1,325 @@
+---
+/**
+ * The evidence beside each case study. All of it is real content, not illustration:
+ * benchmark bars, the phase comparison, the two apps, and real app screenshots.
+ * Bar lengths are SVG attributes because the site's CSP blocks inline style attributes.
+ */
+import { Image } from 'astro:assets';
+import { appScreens } from '../data/photos';
+import { caseStudies } from '../data/site';
+
+interface Props {
+  type: 'face' | 'field' | 'harvest' | 'screens';
+  /** Larger screenshots on the case study page. */
+  large?: boolean;
+}
+const { type, large = false } = Astro.props;
+
+// True accept rate at FAR 1e-4 and model size, from the LFW table in src/data/site.ts.
+const accuracy = [
+  { name: 'FaceNet-512', note: 'Phase 1', value: 84.6 },
+  { name: 'MobileFaceNet 192-d', note: 'considered', value: 95.6 },
+  { name: 'ArcFace MobileFaceNet', note: 'shipped in Phase 2', value: 99.1, chosen: true },
+];
+const sizes = [
+  { name: 'FaceNet-512', value: 47, label: '~47 MB' },
+  { name: 'ArcFace MobileFaceNet', value: 6.9, label: '6.9 MB', chosen: true },
+];
+
+const phases = caseStudies.find((item) => item.slug === 'do-iam-field-operations')?.tables?.[0];
+const phaseRow = (label: string) => phases?.rows.find((row) => row[0] === label) ?? ['', '', ''];
+const period = phaseRow('Period');
+const fieldData = phaseRow('Field data');
+// Barcode strip on the drawn ticket: fixed widths so every build draws the same code.
+const barcode = [2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 3, 1, 2, 2, 1, 3, 1, 1, 2];
+const barcodeRects = barcode.reduce<{ x: number; w: number }[]>((acc, w, i) => {
+  const x = acc.length ? acc[acc.length - 1].x + acc[acc.length - 1].w + (i % 3 === 0 ? 2 : 1.5) : 0;
+  return [...acc, { x, w }];
+}, []);
+const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barcodeRects.length - 1].w;
+---
+
+{type === 'face' && (
+  <figure class="ev ev-chart" data-reveal>
+    <figcaption>
+      <strong>True accept rate</strong> at 1 false accept in 10,000
+    </figcaption>
+    <ul class="bars">
+      {accuracy.map((row) => (
+        <li class:list={{ chosen: row.chosen }}>
+          <span class="bar-name">{row.name}<small>{row.note}</small></span>
+          <b class="bar-value">{row.value}%</b>
+          <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+            <rect class="bar-track" width="100" height="8" />
+            <rect class="bar-fill" width={row.value} height="8" />
+          </svg>
+        </li>
+      ))}
+    </ul>
+    <p class="ev-sub"><strong>Model file size</strong></p>
+    <ul class="bars bars-size">
+      {sizes.map((row) => (
+        <li class:list={{ chosen: row.chosen }}>
+          <span class="bar-name">{row.name}</span>
+          <b class="bar-value">{row.label}</b>
+          <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+            <rect class="bar-track" width="100" height="8" />
+            <rect class="bar-fill" width={(row.value / 47) * 100} height="8" />
+          </svg>
+        </li>
+      ))}
+    </ul>
+    <p class="mono ev-source">Accuracy: LFW benchmark, not field data. Size: model file. Bars start at zero.</p>
+  </figure>
+)}
+
+{type === 'field' && (
+  <figure class="ev ev-phases">
+    <figcaption class="sr-only">How field data moved from NFC tags in Phase 1 to printed tickets in Phase 2</figcaption>
+    <div class="phase">
+      <p class="mono">Phase 1 · {period[1]}</p>
+      <div class="nfc" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><rect x="6" y="6" width="52" height="52" rx="8" /><path d="M22 22c6 6 6 14 0 20M30 17c9 9 9 21 0 30M38 12c12 12 12 28 0 40" /></svg>
+      </div>
+      <p class="phase-what">{fieldData[1]}</p>
+    </div>
+    <div class="phase phase-now">
+      <p class="mono">Phase 2 · {period[2]}</p>
+      <div class="ticket" aria-hidden="true">
+        <b>DO! IAM · HARVEST</b>
+        <span>BLOCK ····· A01</span>
+        <span>BUNCHES ···· 84</span>
+        <span>LOOSE ··· 12 kg</span>
+        <svg class="barcode" viewBox={`0 0 ${barcodeWidth} 10`} preserveAspectRatio="none">
+          {barcodeRects.map((r) => <rect x={r.x} width={r.w} height="10" />)}
+        </svg>
+      </div>
+      <p class="phase-what">{fieldData[2]}</p>
+      <p class="mono ev-source">Ticket drawing uses sample values, not field data.</p>
+    </div>
+  </figure>
+)}
+
+{type === 'harvest' && (
+  <div class="ev ev-apps">
+    <div class="app">
+      <p class="app-name">ePMS</p>
+      <p>Planning, harvest and inspection for estate staff, with NFC data capture.</p>
+      <p class="mono">For estate staff</p>
+    </div>
+    <div class="app">
+      <p class="app-name">eTis</p>
+      <p>Harvest order tickets for plasma and external growers selling fruit to ANJ.</p>
+      <p class="mono">For external growers · public on Google Play</p>
+    </div>
+  </div>
+)}
+
+{type === 'screens' && (
+  <div class:list={['ev', 'ev-screens', { large }]}>
+    {appScreens.map((shot, i) => (
+      <Image
+        class={`screen screen-${i + 1}`}
+        src={shot.src}
+        alt={shot.alt}
+        widths={[240, 360, 480, 640]}
+        sizes={large ? '(max-width: 700px) 30vw, 280px' : '(max-width: 700px) 30vw, 220px'}
+      />
+    ))}
+  </div>
+)}
+
+<style>
+  .ev {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    align-content: center;
+  }
+  .ev-source {
+    color: var(--muted);
+  }
+
+  /* Benchmark bars */
+  .ev-chart {
+    gap: 18px;
+  }
+  .ev-chart figcaption,
+  .ev-sub {
+    color: var(--muted);
+  }
+  .ev-chart strong {
+    color: var(--ink);
+    font-weight: 650;
+  }
+  .ev-sub {
+    margin-top: 6px;
+  }
+  .bars {
+    display: grid;
+    gap: 16px;
+  }
+  .bars li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 6px 16px;
+  }
+  .bar-name {
+    display: grid;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .bar-name small {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+  .bar-value {
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .chosen .bar-value {
+    font-family: var(--font-sans);
+    font-size: 2.2rem;
+    font-stretch: 78%;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--leaf);
+  }
+  .bar {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 12px;
+  }
+  .bar-track {
+    fill: var(--line);
+  }
+  .bar-fill {
+    fill: var(--muted);
+    transform-box: fill-box;
+    transform-origin: left center;
+  }
+  .chosen .bar-fill {
+    fill: var(--leaf);
+  }
+  .bars-size .bar {
+    height: 8px;
+  }
+  /* Bars grow from zero once, when the chart enters view */
+  :global(.has-js) .ev-chart .bar-fill {
+    transform: scaleX(0);
+    transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms;
+  }
+  :global(.has-js) .ev-chart:global(.is-visible) .bar-fill {
+    transform: none;
+  }
+  :global(.has-js) .ev-chart:global([data-reveal]) {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Phase comparison */
+  .ev-phases {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .phase {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .phase > .mono {
+    color: var(--muted);
+  }
+  .phase-now {
+    border-color: var(--ink);
+  }
+  .phase-what {
+    font-weight: 650;
+    line-height: 1.35;
+  }
+  .nfc svg {
+    width: 64px;
+    height: 64px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: square;
+  }
+  .ticket {
+    display: grid;
+    width: min(220px, 100%);
+    gap: 2px;
+    padding: 14px 16px 18px;
+    color: #1b1d18;
+    background: #fbfaf5;
+    border: 1px solid rgba(14, 29, 22, 0.16);
+    border-radius: 4px 4px 0 0;
+    box-shadow: var(--lift);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre;
+  }
+  .ticket b {
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .barcode {
+    width: 100%;
+    height: 22px;
+    margin-top: 10px;
+    fill: #1b1d18;
+  }
+  @media (min-width: 560px) {
+    .ev-phases {
+      grid-template-columns: 1fr 1.2fr;
+    }
+  }
+
+  /* Two apps */
+  .ev-apps {
+    gap: 14px;
+  }
+  .app {
+    display: grid;
+    gap: 8px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .app-name {
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .app > .mono {
+    color: var(--muted);
+  }
+
+  /* Screenshots: phones lie on top of the panel, so they carry the shadow */
+  .ev-screens {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    gap: clamp(8px, 2vw, 18px);
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .ev-screens.large {
+    max-width: 860px;
+  }
+  .screen {
+    width: 100%;
+    filter: drop-shadow(0 18px 24px rgba(6, 22, 15, 0.3));
+  }
+  .screen-2 {
+    transform: translateY(-6%);
+  }
+</style>

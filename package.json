@@ -1,11 +1,11 @@
 {
-  "name": "latentfolio",
+  "name": "faishalyb-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Free evidence-first Astro portfolio template for AI, ML, and GenAI engineers.",
+  "description": "Portfolio of Faishal Yusuf Baqir, Flutter mobile developer. Built with Astro.",
   "author": {
-    "name": "Dharani Eswaramurthi",
-    "url": "https://github.com/Dharani-Eswaramurthi"
+    "name": "Faishal Yusuf Baqir",
+    "url": "https://github.com/faishalyb"
   },
   "license": "MIT",
   "type": "module",
@@ -17,12 +17,13 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "photos": "node scripts/prepare-photos.mjs"
+    "photos": "node scripts/prepare-photos.mjs",
+    "og": "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=4000 --screenshot=public/og-cover.png \"file://$PWD/scripts/og-cover.html\""
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",
-    "@fontsource-variable/instrument-sans": "^5.3.0",
-    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "astro": "7.3.2"
   },
   "devDependencies": {
