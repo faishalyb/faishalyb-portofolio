@@ -54,7 +54,7 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
   const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
   const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
 
-  // Theme: follows the system until the visitor picks one; the choice is remembered.
+  // Theme: light by default; the visitor's choice from the toggle is remembered.
   const syncThemeLabel = () => {
     const dark = document.documentElement.dataset.theme === 'dark';
     themeBtn?.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');

@@ -67,19 +67,19 @@ const jsonLd = noindex
     <script is:inline>
       document.documentElement.classList.add('has-js');
       (function () {
-        var system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         var saved = null;
         try {
           saved = localStorage.getItem('theme');
         } catch (e) {}
-        document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : system;
+        // Light by default; dark only when the visitor picked it with the toggle.
+        document.documentElement.dataset.theme = saved === 'dark' ? 'dark' : 'light';
       })();
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content={profile.name} />
     <meta name="generator" content={Astro.generator} />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#336c01" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
