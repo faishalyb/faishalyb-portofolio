@@ -1,40 +1,44 @@
 ---
 import Base from '../layouts/Base.astro';
-import SignalMeter from '../components/SignalMeter.astro';
+import Icon from '../components/Icon.astro';
 import { profile } from '../data/site';
 ---
 
 <Base title={`Page not found · ${profile.name}`} description="This page could not be found." noindex>
-  <section class="lost on-canopy">
+  <section class="lost section">
     <div class="shell">
-      <p class="index"><b>404</b> Page not found</p>
-      <h1>No signal on this <span class="nowrap">page.<SignalMeter class="lost-meter" /></span></h1>
-      <p>The address may be mistyped, or the page has moved. Everything else is where you left it.</p>
-      <a class="btn btn-fruit" href="/">Back to the home page</a>
+      <div class="card lost-card">
+        <span class="icon-tile lost-icon"><Icon name="wifi-off" size={32} /></span>
+        <p class="eyebrow"><b>404</b> Page not found</p>
+        <h1>No signal on this page.</h1>
+        <p>The address may be mistyped, or the page has moved. Everything else is where you left it.</p>
+        <a class="btn btn-primary" href="/"><Icon name="arrow-left" size={18} />Back to the home page</a>
+      </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .lost {
-    padding-block: clamp(72px, 14vw, 160px);
-  }
-  .lost .shell {
+  .lost-card {
     display: grid;
-    justify-items: start;
-    gap: 24px;
+    justify-items: center;
+    gap: 20px;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: clamp(32px, 6vw, 64px);
+    text-align: center;
+  }
+  .lost-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-lg);
   }
   .lost h1 {
-    max-width: 12ch;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
   }
-  .lost :global(.lost-meter) {
-    width: 0.62em;
-    margin-left: 0.22em;
-    color: var(--on-canopy-muted);
-  }
-  .lost p:not(.index) {
-    max-width: 48ch;
-    color: var(--on-canopy-muted);
+  .lost p:not(.eyebrow) {
+    max-width: 44ch;
+    color: var(--color-muted-foreground);
     font-size: 1.1rem;
   }
 </style>

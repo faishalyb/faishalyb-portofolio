@@ -46,7 +46,7 @@ export const portrait: Photo = {
   caption: 'Faishal Yusuf Baqir · Jakarta',
 };
 
-/** The first two are drawn on the page; the rest open in the viewer. */
+/** All four are drawn as equal tiles on the page and open in the viewer as one group. */
 export const researchPhotos: Photo[] = [
   {
     src: researchTeam1Image,

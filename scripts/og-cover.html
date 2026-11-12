@@ -2,6 +2,7 @@
 <!--
   Source for public/og-cover.png (the 1200 x 630 social share image).
   Rebuild with: npm run og   (renders this page in headless Chrome)
+  Colours (#336C01, #28A745) and type (Poppins) follow design-system/faishal-yusuf-baqir-portfolio/MASTER.md.
 -->
 <html lang="en">
   <head>
@@ -9,14 +10,14 @@
     <title>Share image</title>
     <style>
       @font-face {
-        font-family: 'Archivo';
-        src: url('../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2-variations');
-        font-weight: 100 900;
-        font-stretch: 62% 125%;
+        font-family: 'Poppins';
+        src: url('../node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2') format('woff2');
+        font-weight: 500;
       }
       @font-face {
-        font-family: 'Plex Mono';
-        src: url('../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+        font-family: 'Poppins';
+        src: url('../node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff2') format('woff2');
+        font-weight: 700;
       }
       * {
         margin: 0;
@@ -29,61 +30,77 @@
         overflow: hidden;
       }
       body {
+        position: relative;
         display: grid;
         grid-template-rows: auto 1fr auto;
         padding: 64px 72px 56px;
-        color: #eef2ea;
-        background: #0f3526;
-        font-family: 'Archivo', sans-serif;
+        color: #1d2419;
+        background: #f6faf3;
+        font-family: 'Poppins', sans-serif;
+      }
+      body::before,
+      body::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+      }
+      body::before {
+        top: -180px;
+        right: -120px;
+        width: 520px;
+        height: 520px;
+        background: rgba(40, 167, 69, 0.1);
+      }
+      body::after {
+        bottom: -200px;
+        left: 420px;
+        width: 380px;
+        height: 380px;
+        background: rgba(51, 108, 1, 0.08);
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
       }
       .name {
-        font-size: 34px;
-        font-stretch: 80%;
-        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 32px;
+        font-weight: 700;
       }
       h1 {
         align-self: center;
-        max-width: 980px;
-        font-size: 104px;
-        font-stretch: 76%;
-        font-weight: 800;
-        line-height: 0.95;
-      }
-      .nowrap {
-        white-space: nowrap;
+        max-width: 1000px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 84px;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1.02;
       }
       .mark {
-        padding: 0 8px;
-        color: #0e1d16;
-        background: #f25a2b;
-      }
-      svg {
-        display: inline-block;
-        width: 72px;
-        margin-left: 18px;
-        fill: none;
-        stroke: #b3c3b8;
-        stroke-width: 2.6;
+        color: #336c01;
+        background: linear-gradient(transparent 62%, rgba(40, 167, 69, 0.24) 62%);
       }
       .foot {
-        padding-top: 22px;
-        color: #b3c3b8;
-        border-top: 1px solid rgba(238, 242, 234, 0.2);
-        font-family: 'Plex Mono', monospace;
-        font-size: 26px;
+        display: flex;
+        gap: 12px;
+      }
+      .chip {
+        padding: 8px 20px;
+        color: #336c01;
+        background: #ffffff;
+        border: 2px solid #d4e6cc;
+        border-radius: 999px;
+        font-size: 24px;
+        font-weight: 500;
       }
     </style>
   </head>
   <body>
     <p class="name">Faishal Yusuf Baqir</p>
-    <h1>
-      I build Flutter apps for places with <span class="nowrap"><span class="mark">no signal.</span><svg viewBox="0 0 44 36" aria-hidden="true">
-        <rect x="2" y="25" width="7" height="9" />
-        <rect x="13" y="18" width="7" height="16" />
-        <rect x="24" y="10" width="7" height="24" />
-        <rect x="35" y="2" width="7" height="32" />
-      </svg></span>
-    </h1>
-    <p class="foot">Flutter mobile developer · offline-first field apps · Jakarta</p>
+    <h1>I build Flutter apps for places with <span class="mark">no signal.</span></h1>
+    <p class="foot"><span class="chip">Flutter mobile developer</span><span class="chip">Offline-first field apps</span><span class="chip">Jakarta</span></p>
   </body>
 </html>

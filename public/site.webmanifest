@@ -4,8 +4,8 @@
   "description": "Offline-first Flutter apps for palm oil plantations, with case studies and evidence.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f3526",
-  "theme_color": "#0f3526",
+  "background_color": "#f6faf3",
+  "theme_color": "#336c01",
   "icons": [
     {
       "src": "/favicon.svg",

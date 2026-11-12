@@ -5,66 +5,62 @@ import { profile, socialLinks } from '../data/site';
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer on-canopy">
+<footer class="site-footer">
   <div class="shell foot">
-    <p class="foot-name">{profile.name}<span>{profile.role} · {profile.location}</span></p>
+    <div class="foot-name">
+      <strong>{profile.name}</strong>
+      <span>{profile.role} · {profile.location}</span>
+    </div>
     <ul class="foot-links">
-      <li><a href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={16} /></a></li>
-      <li><a href={profile.portfolioPdf} target="_blank" rel="noopener">Portfolio (PDF) <Icon name="download" size={16} /></a></li>
+      <li><a href={profile.resume} target="_blank" rel="noopener"><Icon name="download" size={16} />Résumé (PDF)</a></li>
+      <li><a href={profile.portfolioPdf} target="_blank" rel="noopener"><Icon name="download" size={16} />Portfolio (PDF)</a></li>
       {socialLinks.map((link) => (
-        <li><a href={link.href} target="_blank" rel="noopener">{link.label} <Icon name="out" size={16} /></a></li>
+        <li><a href={link.href} target="_blank" rel="noopener"><Icon name={link.icon as 'github' | 'linkedin'} size={16} />{link.label}</a></li>
       ))}
       <li><a href="#top">Back to top</a></li>
     </ul>
-    <p class="mono foot-copy">© {year} {profile.name}</p>
+    <p class="foot-copy">© {year} {profile.name}</p>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    background: var(--canopy-deep);
+    border-top: 1px solid var(--color-border);
   }
   .foot {
     display: grid;
-    gap: 22px;
-    padding-block: 40px;
+    gap: 20px;
+    padding-block: 36px 40px;
   }
   .foot-name {
     display: grid;
-    font-size: 1.35rem;
-    font-stretch: 80%;
-    font-weight: 800;
-    line-height: 1.2;
+    gap: 2px;
   }
-  .foot-name span {
-    color: var(--on-canopy-muted);
+  .foot-name strong {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+  }
+  .foot-name span,
+  .foot-copy {
+    color: var(--color-muted-foreground);
     font-size: 0.95rem;
-    font-stretch: 100%;
-    font-weight: 400;
   }
   .foot-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0 22px;
+    gap: 0 20px;
   }
   .foot-links a {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     min-height: 44px;
-    color: var(--on-canopy-muted);
-    font-weight: 550;
+    color: var(--color-muted-foreground);
+    font-weight: 500;
+    transition: color var(--duration) ease;
   }
   .foot-links a:hover {
-    color: var(--on-canopy);
-    text-decoration: underline;
-    text-underline-offset: 5px;
-  }
-  .foot-links a:active {
-    opacity: 0.7;
-  }
-  .foot-copy {
-    color: var(--on-canopy-muted);
+    color: var(--color-primary);
   }
   @media (min-width: 900px) {
     .foot {
@@ -73,6 +69,9 @@ const year = new Date().getFullYear();
     }
     .foot-links {
       justify-content: flex-end;
+    }
+    .foot-copy {
+      grid-column: 1 / -1;
     }
   }
 </style>

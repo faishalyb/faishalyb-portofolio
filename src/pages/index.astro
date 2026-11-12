@@ -1,11 +1,15 @@
 ---
+/**
+ * Home page. Layout follows design-system/faishal-yusuf-baqir-portfolio/MASTER.md:
+ * "Feature-Rich Showcase" — hero with the value proposition, a bento grid of case studies,
+ * a call to action after the features, supporting sections, and a closing CTA.
+ */
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import CaseVisual from '../components/CaseVisual.astro';
 import FaceCheck from '../components/FaceCheck.astro';
-import Icon from '../components/Icon.astro';
+import Icon, { type IconName } from '../components/Icon.astro';
 import PhotoLink from '../components/PhotoLink.astro';
-import SignalMeter from '../components/SignalMeter.astro';
 import { classPhoto, defensePhotos, logos, portrait, researchPhotos, weddingPhotos } from '../data/photos';
 import {
   articles,
@@ -30,246 +34,265 @@ const span = (roles: { dates: string }[]) => {
   return end ? `${start} – ${end}` : start;
 };
 const campusPhotos = [classPhoto, ...defensePhotos];
+// The address may wrap only at the @ sign, never mid-word.
+const [emailUser, emailDomain] = profile.email.split('@');
+// One icon per area of expertise, in the order of `expertise` in site.ts.
+const expertiseIcons: IconName[] = ['wifi-off', 'scan-face', 'map-pin'];
 ---
 
 <Base title={pageCopy.seoTitle} description={pageCopy.seoDescription}>
-  <!-- Hero: the headline is the focal point; the portrait and readouts back it up -->
-  <section class="hero on-canopy" aria-labelledby="hero-title">
+  <!-- Hero: value proposition, two CTAs, portrait, then the proof points as a bento -->
+  <section class="hero" aria-labelledby="hero-title">
     <div class="shell hero-grid">
-      <div class="hero-copy">
-        <p class="index"><b>{profile.name}</b> {profile.role} · {profile.location}</p>
+      <div class="hero-copy" data-reveal>
+        <p class="status"><span class="status-dot" aria-hidden="true"></span>{profile.availability}</p>
         <h1 id="hero-title">
-          {pageCopy.heroTitle.lead} <span class="nowrap"><span class="mark">{pageCopy.heroTitle.mark}</span><SignalMeter class="hero-meter" /></span>
+          {pageCopy.heroTitle.lead} <span class="nowrap"><span class="mark">{pageCopy.heroTitle.mark}</span><span class="hero-icon" aria-hidden="true"><Icon name="wifi-off" size={48} /></span></span>
         </h1>
         <p class="hero-lede">{pageCopy.heroSummary}</p>
         <div class="hero-actions">
-          <a class="btn btn-light" href="#work">See the case studies</a>
-          <a class="btn btn-line" href={profile.resume} target="_blank" rel="noopener">Download résumé (PDF) <Icon name="download" size={18} /></a>
+          <a class="btn btn-primary" href="#work">See the case studies <Icon name="arrow-right" size={18} /></a>
+          <a class="btn btn-secondary" href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={18} /></a>
         </div>
-        <p class="hero-status">{profile.availability}.</p>
+        <p class="hero-meta"><Icon name="map-pin" size={18} />{profile.role} · {profile.location}</p>
       </div>
 
-      <figure class="hero-portrait">
+      <figure class="hero-portrait" data-reveal>
+        <svg class="hero-blob" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+          <path d="M44.6,-58.4C57.2,-49.9,66.5,-36.1,71.4,-20.6C76.3,-5.1,76.8,12.1,70.1,25.9C63.4,39.7,49.5,50.1,34.6,58.4C19.7,66.7,3.8,72.9,-12.9,72.1C-29.6,71.3,-47.1,63.5,-58.6,50.4C-70.1,37.3,-75.6,18.6,-74.8,0.7C-74,-17.2,-66.9,-34.4,-55,-43.3C-43.1,-52.2,-26.3,-52.8,-10.3,-55.8C5.8,-58.8,32,-66.9,44.6,-58.4Z" transform="translate(100 100)" />
+        </svg>
         <Image src={portrait.src} alt={portrait.alt} widths={[360, 540, 720, 960]} sizes="(max-width: 900px) 80vw, 420px" priority />
         <figcaption class="now">
-          <span class="mono">Now</span>
-          <strong>{profile.title}</strong>
-          <span>{profile.company}</span>
+          <span class="icon-tile"><Icon name="briefcase" size={22} /></span>
+          <span class="now-text">
+            <span class="label">Now</span>
+            <strong>{profile.title}</strong>
+            <span>{profile.company}</span>
+          </span>
         </figcaption>
       </figure>
     </div>
 
     <div class="shell">
-      <p class="mono readouts-note">{pageCopy.receiptsIntro}</p>
-      <dl class="readouts">
+      <p class="label proof-note">{pageCopy.receiptsIntro}</p>
+      <dl class="proof" data-stagger>
         {proofPoints.map((point) => (
-          <div>
+          <div class="card proof-card">
             <dt>{point.label}</dt>
-            <dd class="readout-value">{point.value}</dd>
-            <dd class="mono readout-source">{point.source}</dd>
+            <dd class="proof-value num">{point.value}</dd>
+            <dd class="label">{point.source}</dd>
           </div>
         ))}
       </dl>
     </div>
   </section>
 
-  <!-- 01 Selected work: wide spreads, evidence on alternating sides -->
+  <!-- 01 Selected work: bento grid of case-study cards, each card one link -->
   <section class="section" id="work" aria-labelledby="work-title">
     <div class="shell">
       <header class="sec-head" data-reveal>
-        <p class="index"><b>01</b> Selected work</p>
+        <p class="eyebrow"><b>01</b> Selected work</p>
         <h2 id="work-title">Field apps, measured.</h2>
         <p>{pageCopy.workIntro}</p>
       </header>
 
-      <ol class="cases">
-        {caseStudies.map((project) => (
-          <li class="case" data-reveal>
-            <div class="case-top">
-              <span class="case-num" aria-hidden="true">{project.index}</span>
-              <span class="mono">{project.label}</span>
-              <span class="mono case-period">{project.period}</span>
+      <ol class="cases" data-stagger>
+        {caseStudies.map((project, i) => (
+          <li class={`card card-hover case case-${i + 1}`}>
+            <div class="case-ev">
+              <CaseVisual type={project.visual} />
             </div>
-            <div class="case-body">
-              <div class="case-copy">
-                <h3>{project.title}</h3>
-                <p>{project.summary}</p>
-                <p class="case-outcome"><span class="mono">Outcome</span>{project.outcome}</p>
-                <ul class="tags">{project.stack.slice(0, 5).map((item) => <li>{item}</li>)}</ul>
-                <a class="btn btn-ink case-link" href={`/work/${project.slug}`}>
-                  Read the case study<span class="sr-only">: {project.title}</span>
-                </a>
-              </div>
-              <div class="case-ev">
-                <CaseVisual type={project.visual} />
-              </div>
+            <div class="case-copy">
+              <p class="case-meta">
+                <span class="case-chip">{project.label}</span>
+                <span class="label">{project.period}</span>
+              </p>
+              <h3><a class="stretch" href={`/work/${project.slug}`}>{project.title}</a></h3>
+              <p class="case-summary">{project.summary}</p>
+              <p class="case-outcome"><span class="label">Outcome</span>{project.outcome}</p>
+              <ul class="tags">{project.stack.slice(0, 5).map((item) => <li>{item}</li>)}</ul>
+              <span class="case-more" aria-hidden="true">Read the case study <Icon name="arrow-right" size={18} /></span>
             </div>
           </li>
         ))}
       </ol>
+
+      <!-- CTA after the features -->
+      <div class="card cta-strip" data-reveal>
+        <span class="icon-tile"><Icon name="file-text" size={24} /></span>
+        <div class="cta-text">
+          <h3>Want the full picture?</h3>
+          <p>The résumé and the portfolio PDF cover every role and project in one place.</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={18} /></a>
+          <a class="btn btn-secondary" href={profile.portfolioPdf} target="_blank" rel="noopener">Portfolio (PDF) <Icon name="download" size={18} /></a>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- 02 The face check, as an interactive band -->
+  <!-- 02 The face check -->
   <FaceCheck index="02" />
 
-  <!-- 03 What I do: sticky heading, three explanations -->
+  <!-- 03 What I do: three feature cards -->
   <section class="section" aria-labelledby="skills-title">
-    <div class="shell skills">
-      <header class="skills-head" data-reveal>
-        <p class="index"><b>03</b> What I do</p>
+    <div class="shell">
+      <header class="sec-head" data-reveal>
+        <p class="eyebrow"><b>03</b> What I do</p>
         <h2 id="skills-title">Built for the field, end to end.</h2>
         <p>{pageCopy.expertiseIntro}</p>
       </header>
-      <ol class="skills-list">
+      <ol class="skills" data-stagger>
         {expertise.map((item, i) => (
-          <li data-reveal>
-            <span class="mono">0{i + 1}</span>
+          <li class="card skill">
+            <span class="icon-tile"><Icon name={expertiseIcons[i] ?? 'code'} size={24} /></span>
             <h3>{item.title}</h3>
             <p>{item.description}</p>
-            <p class="mono skills-tools">{item.tools.join(' · ')}</p>
+            <ul class="tags">{item.tools.map((tool) => <li>{tool}</li>)}</ul>
           </li>
         ))}
       </ol>
     </div>
   </section>
 
-  <!-- 04 Experience: a CV-style table -->
+  <!-- 04 Experience: a timeline of cards -->
   <section class="section exp-section" id="experience" aria-labelledby="exp-title">
     <div class="shell">
       <header class="sec-head" data-reveal>
-        <p class="index"><b>04</b> Experience</p>
+        <p class="eyebrow"><b>04</b> Experience</p>
         <h2 id="exp-title">From a network lab to the plantation field.</h2>
         <p>{pageCopy.journeyIntro}</p>
-        <div class="sec-links">
-          <a class="text-link" href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={16} /></a>
-          <a class="text-link" href={profile.portfolioPdf} target="_blank" rel="noopener">Portfolio (PDF) <Icon name="download" size={16} /></a>
-        </div>
       </header>
 
-      <ol class="jobs">
+      <ol class="timeline">
         {experience.map((job) => (
           <li class="job" data-reveal>
-            <p class="mono job-dates">{span(job.roles)}</p>
-            <div class="job-org">
-              <span class="job-logo">
-                {job.logo ? <Image src={logos[job.logo]} alt="" width={112} height={112} /> : <span aria-hidden="true">{job.marker}</span>}
-              </span>
-              <div>
-                <h3>{job.company}</h3>
-                <p class="job-place">{job.location}</p>
+            <span class="tl-dot" aria-hidden="true"></span>
+            <article class="card job-card">
+              <div class="job-head">
+                <span class="job-logo">
+                  {job.logo ? <Image src={logos[job.logo]} alt="" width={112} height={112} /> : <span aria-hidden="true">{job.marker}</span>}
+                </span>
+                <div class="job-org">
+                  <h3>{job.company}</h3>
+                  <p class="job-place">{job.location}</p>
+                </div>
+                <span class="date-chip num">{span(job.roles)}</span>
               </div>
-            </div>
-            <div class="job-detail">
               <ul class="job-roles">
                 {job.roles.map((role) => (
-                  <li><strong>{role.title}</strong><span class="mono">{role.dates}</span></li>
+                  <li><strong>{role.title}</strong>{job.roles.length > 1 && <span class="label num">{role.dates}</span>}</li>
                 ))}
               </ul>
-              <p>{job.note}</p>
+              <p class="job-note">{job.note}</p>
               {job.gallery === 'research' && (
                 <div class="job-photos">
-                  <PhotoLink photo={researchPhotos[0]} group="research" sizes="(max-width: 700px) 40vw, 200px" widths={[320, 480]} />
-                  <PhotoLink photo={researchPhotos[1]} group="research" count={researchPhotos.length} sizes="(max-width: 700px) 56vw, 360px" widths={[480, 720, 960]} />
-                  {researchPhotos.slice(2).map((photo) => <PhotoLink photo={photo} group="research" viewerOnly />)}
+                  {researchPhotos.map((photo) => (
+                    <PhotoLink photo={photo} group="research" sizes="(max-width: 760px) 44vw, 280px" widths={[320, 480, 640]} />
+                  ))}
                 </div>
               )}
               {job.link && (
                 <a class="text-link" href={job.link.href} target="_blank" rel="noopener">{job.link.label} <Icon name="out" size={16} /></a>
               )}
-            </div>
+            </article>
           </li>
         ))}
       </ol>
     </div>
   </section>
 
-  <!-- 05 Writing and side builds: two plain lists on a panel band -->
+  <!-- 05 Writing and side builds -->
   <section class="section writing" id="writing" aria-labelledby="writing-title">
     <div class="shell">
       <header class="sec-head" data-reveal>
-        <p class="index"><b>05</b> Writing and side builds</p>
+        <p class="eyebrow"><b>05</b> Writing and side builds</p>
         <h2 id="writing-title">Published research, and smaller builds.</h2>
         <p>{pageCopy.publicationsIntro}</p>
       </header>
       <div class="writing-grid">
         {articles.length > 0 && (
-          <div data-reveal>
+          <div class="writing-col">
             <h3 class="list-title">Publications</h3>
-            <ul class="papers">
+            <ul class="papers" data-stagger>
               {articles.map((article) => (
-                <li>
-                  <p class="mono">{article.date} · {article.source} · {article.category}</p>
-                  <a class="paper-link" href={article.href} target="_blank" rel="noopener">
-                    {article.title} <Icon name="out" size={18} />
+                <li class="card card-hover paper">
+                  <p class="label">{article.date} · {article.source} · {article.category}</p>
+                  <a class="paper-link stretch" href={article.href} target="_blank" rel="noopener">
+                    {article.title}<span class="sr-only"> (opens in a new tab)</span>
                   </a>
                   <p class="paper-desc">{article.description}</p>
+                  <span class="paper-icon" aria-hidden="true"><Icon name="out" size={18} /></span>
                 </li>
               ))}
             </ul>
           </div>
         )}
         {otherProjects.length > 0 && (
-          <div data-reveal>
+          <div class="writing-col">
             <h3 class="list-title">Other builds</h3>
-            <ul class="builds">
+            <ul class="builds" data-stagger>
               {otherProjects.map((item) => (
-                <li>
-                  <a href={item.href} target="_blank" rel="noopener">
-                    <span class="build-name">{item.title} <Icon name="out" size={16} /></span>
-                    <span class="mono">{item.year}</span>
-                    <span class="build-body">{item.body}</span>
-                  </a>
+                <li class="card card-hover build">
+                  <p class="build-top">
+                    <span class="icon-tile"><Icon name="code" size={20} /></span>
+                    <span class="label num">{item.year}</span>
+                  </p>
+                  <a class="build-name stretch" href={item.href} target="_blank" rel="noopener">{item.title}</a>
+                  <p class="build-body">{item.body}</p>
                 </li>
               ))}
             </ul>
-            <a class="text-link" href={githubUrl} target="_blank" rel="noopener">More code and experiments on GitHub <Icon name="out" size={16} /></a>
+            <a class="text-link" href={githubUrl} target="_blank" rel="noopener"><Icon name="github" size={18} />More code and experiments on GitHub</a>
           </div>
         )}
       </div>
     </div>
   </section>
 
-  <!-- 06 Outside the day job: campus, capstone, weddings -->
+  <!-- 06 Outside the day job: a bento of campus, capstone and weddings -->
   <section class="section" aria-labelledby="beyond-title">
     <div class="shell">
       <header class="sec-head" data-reveal>
-        <p class="index"><b>06</b> Outside the day job</p>
+        <p class="eyebrow"><b>06</b> Outside the day job</p>
         <h2 id="beyond-title">Before the plantations.</h2>
         <p>{pageCopy.beyondLead}</p>
       </header>
 
-      <div class="campus" data-reveal>
-        <PhotoLink class="campus-photo" photo={campusPhotos[0]} group="campus" count={campusPhotos.length} sizes="(max-width: 900px) 92vw, 640px" widths={[480, 720, 960, 1280]} />
-        {campusPhotos.slice(1).map((photo) => <PhotoLink photo={photo} group="campus" viewerOnly />)}
-        <div class="campus-text">
-          <div class="edu">
-            <p class="mono">{education.dates} · {education.score}</p>
-            <h3>{education.degree}</h3>
-            <p>{education.institution}</p>
-            <ul class="certs">
-              {education.certifications.map((cert) => <li>{cert}</li>)}
-            </ul>
-            <a class="text-link" href={education.certificationsUrl} target="_blank" rel="noopener">Google Cloud Skills Boost profile <Icon name="out" size={16} /></a>
-          </div>
-          <div class="capstone">
-            <p class="mono">{spotlight.label}</p>
-            <h3><a href={spotlight.href}>{spotlight.title}</a></h3>
-            <p>{spotlight.body}</p>
-            <ul class="capstone-links">
-              {spotlight.links.map((link) => (
-                <li><a class="text-link" href={link.href} target="_blank" rel="noopener">{link.label} <Icon name="out" size={15} /></a></li>
-              ))}
-            </ul>
-          </div>
+      <div class="beyond">
+        <div class="beyond-photo" data-reveal>
+          <PhotoLink class="campus-photo" photo={campusPhotos[0]} group="campus" count={campusPhotos.length} sizes="(max-width: 900px) 92vw, 600px" widths={[480, 720, 960, 1280]} />
+          {campusPhotos.slice(1).map((photo) => <PhotoLink photo={photo} group="campus" viewerOnly />)}
+        </div>
+        <div class="card edu" data-reveal>
+          <span class="icon-tile"><Icon name="graduation-cap" size={24} /></span>
+          <p class="label">{education.dates} · {education.score}</p>
+          <h3>{education.degree}</h3>
+          <p class="muted">{education.institution}</p>
+          <ul class="certs">
+            {education.certifications.map((cert) => <li><Icon name="check" size={16} />{cert}</li>)}
+          </ul>
+          <a class="text-link" href={education.certificationsUrl} target="_blank" rel="noopener">Google Cloud Skills Boost profile <Icon name="out" size={16} /></a>
+        </div>
+        <div class="card capstone" data-reveal>
+          <span class="icon-tile"><Icon name="award" size={24} /></span>
+          <p class="label">{spotlight.label}</p>
+          <h3><a href={spotlight.href}>{spotlight.title}</a></h3>
+          <p class="muted">{spotlight.body}</p>
+          <ul class="capstone-links">
+            {spotlight.links.map((link) => (
+              <li><a class="text-link" href={link.href} target="_blank" rel="noopener">{link.label} <Icon name="out" size={15} /></a></li>
+            ))}
+          </ul>
         </div>
       </div>
 
       <div class="wedding" data-reveal>
-        <PhotoLink class="wedding-photo" photo={weddingPhotos[0]} group="wedding" count={weddingPhotos.length} sizes="(max-width: 900px) 92vw, 1240px" widths={[640, 960, 1280, 1800]} />
+        <PhotoLink class="wedding-photo" photo={weddingPhotos[0]} group="wedding" count={weddingPhotos.length} sizes="(max-width: 900px) 92vw, 1200px" widths={[640, 960, 1280, 1800]} />
         {weddingPhotos.slice(1).map((photo) => <PhotoLink photo={photo} group="wedding" viewerOnly />)}
         <div class="wedding-text">
-          <p class="mono">{wedding.label}</p>
+          <p class="label">{wedding.label}</p>
           <h3>{wedding.headline}</h3>
           <p>{wedding.title}. {wedding.body}</p>
         </div>
@@ -277,29 +300,31 @@ const campusPhotos = [classPhoto, ...defensePhotos];
     </div>
   </section>
 
-  <!-- Contact: the closing canopy bookend -->
-  <section class="contact on-canopy" id="contact" aria-labelledby="contact-title">
-    <div class="shell contact-inner" data-reveal>
-      <div class="contact-head">
-        <p class="index"><b>07</b> Contact</p>
-        <h2 id="contact-title">Need an app that keeps working with no <span class="nowrap">signal?<SignalMeter class="contact-meter" /></span></h2>
+  <!-- 07 Contact: the closing call to action -->
+  <section class="section contact-section" id="contact" aria-labelledby="contact-title">
+    <div class="shell">
+      <div class="contact on-primary" data-reveal>
+        <div class="contact-head">
+          <p class="eyebrow"><b>07</b> Contact</p>
+          <h2 id="contact-title">Need an app that keeps working with no signal?</h2>
+          <p class="contact-body">{pageCopy.contactBody}</p>
+        </div>
+        <div class="contact-reach">
+          <a class="contact-email" href={`mailto:${profile.email}`}>{emailUser}<wbr />@{emailDomain}</a>
+          <div class="contact-actions">
+            <a class="btn btn-light" href={`mailto:${profile.email}`}><Icon name="mail" size={18} />Email me</a>
+            <button class="btn btn-outline-light" type="button" data-copy={profile.email}>
+              <Icon name="copy" size={18} /><span data-copy-label>Copy email address</span>
+            </button>
+            {socialLinks.map((link) => (
+              <a class="btn btn-outline-light" href={link.href} target="_blank" rel="noopener">
+                <Icon name={link.icon as 'github' | 'linkedin'} size={18} />{link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+        <p class="sr-only" aria-live="polite" data-copy-status></p>
       </div>
-      <div class="contact-reach">
-      <p class="contact-body">{pageCopy.contactBody}</p>
-      <a class="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a>
-      <div class="contact-actions">
-        <a class="btn btn-fruit" href={`mailto:${profile.email}`}>Email me</a>
-        <button class="btn btn-line" type="button" data-copy={profile.email}>
-          <Icon name="copy" size={18} /><span data-copy-label>Copy email address</span>
-        </button>
-        {socialLinks.map((link) => (
-          <a class="btn btn-line" href={link.href} target="_blank" rel="noopener">
-            <Icon name={link.icon as 'github' | 'linkedin'} size={18} />{link.label}
-          </a>
-        ))}
-      </div>
-      </div>
-      <p class="sr-only" aria-live="polite" data-copy-status></p>
     </div>
   </section>
 
@@ -328,9 +353,22 @@ const campusPhotos = [classPhoto, ...defensePhotos];
 </Base>
 
 <style>
+  .muted {
+    color: var(--color-muted-foreground);
+  }
+
   /* Hero */
   .hero {
-    padding-top: clamp(40px, 7vw, 96px);
+    position: relative;
+    padding-top: clamp(32px, 6vw, 80px);
+    padding-bottom: clamp(48px, 7vw, 88px);
+    background:
+      radial-gradient(60% 50% at 85% 10%, color-mix(in srgb, var(--color-secondary) 16%, transparent), transparent 70%),
+      radial-gradient(50% 40% at 0% 100%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 70%);
+  }
+  /* In dark mode the page gradient already lights the top; a second glow would leave an edge */
+  :global([data-theme='dark']) .hero {
+    background: none;
   }
   .hero-grid {
     display: grid;
@@ -338,84 +376,146 @@ const campusPhotos = [classPhoto, ...defensePhotos];
   }
   .hero-copy {
     display: grid;
-    align-content: start;
-    gap: 26px;
+    align-content: center;
+    justify-items: start;
+    gap: 24px;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 10px;
+    color: var(--color-foreground);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .status-dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    background: var(--color-secondary);
+    border-radius: 50%;
+  }
+  .status-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--color-secondary);
+    border-radius: 50%;
+    opacity: 0;
+    animation: ping 2.4s var(--ease-out) infinite;
+  }
+  @keyframes ping {
+    0% {
+      opacity: 0.7;
+      transform: scale(0.6);
+    }
+    80%,
+    100% {
+      opacity: 0;
+      transform: scale(1.5);
+    }
   }
   .hero h1 {
-    max-width: 13ch;
+    max-width: 14ch;
   }
-  /* The fruit marker behind "no signal." is the hero's one accent */
   .mark {
-    padding: 0 0.08em;
-    color: var(--on-fruit);
-    background: var(--fruit);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
+    color: var(--color-primary);
+    background: linear-gradient(transparent 62%, color-mix(in srgb, var(--color-secondary) 24%, transparent) 62%);
   }
-  .hero :global(.hero-meter) {
-    width: 0.7em;
-    margin-left: 0.22em;
-    color: var(--on-canopy-muted);
+  .hero-icon {
+    display: inline-block;
+    margin-left: 0.18em;
+    color: var(--color-secondary);
+    vertical-align: -0.04em;
+  }
+  .hero-icon :global(svg) {
+    width: 0.62em;
+    height: 0.62em;
   }
   .hero-lede {
-    max-width: 52ch;
-    color: var(--on-canopy-muted);
-    font-size: clamp(1.08rem, 1.5vw, 1.22rem);
-    line-height: 1.55;
+    max-width: 54ch;
+    color: var(--color-muted-foreground);
+    font-size: clamp(1.08rem, 1.5vw, 1.2rem);
   }
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
-  .hero-status {
-    color: var(--on-canopy-muted);
+  .hero-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-muted-foreground);
     font-size: 0.95rem;
+  }
+  .hero-meta :global(.icon) {
+    color: var(--color-primary);
   }
   .hero-portrait {
     position: relative;
-    width: min(420px, 86%);
+    width: min(400px, 84%);
     justify-self: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
+  }
+  /* Organic shape peeking out behind the portrait (decorative) */
+  .hero-blob {
+    position: absolute;
+    z-index: 0;
+    top: 30%;
+    left: -24%;
+    width: 85%;
+    height: auto;
+    max-width: none;
+    fill: color-mix(in srgb, var(--color-secondary) 28%, transparent);
   }
   .hero-portrait img {
+    position: relative;
+    z-index: 1;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
     object-position: 50% 30%;
-    border-radius: var(--radius-l);
+    border-radius: 32px 32px 32px 96px;
+    box-shadow: var(--shadow-xl);
   }
-  /* The "now" card lies on the photo, so it carries the shadow */
   .now {
     position: absolute;
-    left: -18px;
-    bottom: -24px;
-    display: grid;
-    max-width: 280px;
-    gap: 2px;
-    padding: 14px 18px;
-    color: var(--ink);
-    background: var(--surface);
-    border-radius: 14px;
-    box-shadow: var(--lift);
+    z-index: 2;
+    left: -16px;
+    bottom: -28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 300px;
+    padding: 14px 18px 14px 14px;
+    background: var(--color-card-solid);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
     line-height: 1.35;
   }
-  .now .mono {
-    color: var(--leaf);
+  .now-text {
+    display: grid;
   }
   .now strong {
-    font-stretch: 88%;
-    font-size: 1.08rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
   }
-  .now span:last-child {
-    color: var(--muted);
-    font-size: 0.92rem;
+  .now-text span:last-child {
+    color: var(--color-muted-foreground);
+    font-size: 0.9rem;
   }
   @media (min-width: 900px) {
     .hero-grid {
       grid-template-columns: 1fr 380px;
       align-items: center;
-      gap: 64px;
+      gap: 72px;
     }
     .hero-portrait {
       width: 100%;
@@ -427,263 +527,296 @@ const campusPhotos = [classPhoto, ...defensePhotos];
     }
   }
 
-  /* Readouts: number, label, source */
-  .readouts-note {
+  /* Proof points: a bento, the headline number takes the big tile */
+  .proof-note {
     margin-top: clamp(56px, 8vw, 88px);
-    padding-top: 18px;
-    color: var(--on-canopy-muted);
-    border-top: 1px solid var(--canopy-line);
+    margin-bottom: 16px;
   }
-  .readouts {
+  .proof {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 28px 20px;
-    padding-block: 22px clamp(48px, 7vw, 72px);
+    gap: 12px;
   }
-  .readouts > div {
+  .proof-card {
     display: grid;
-    align-content: start;
+    align-content: end;
     gap: 6px;
+    padding: 20px;
   }
-  .readouts > div:first-child {
-    grid-column: 1 / -1;
-  }
-  .readout-value {
-    order: -1;
-    font-size: clamp(2.6rem, 6vw, 3.6rem);
-    font-stretch: 75%;
-    font-weight: 800;
-    line-height: 0.95;
-  }
-  .readouts > div:first-child .readout-value {
-    font-size: clamp(4.4rem, 14vw, 6.6rem);
-  }
-  .readouts dt {
-    color: var(--on-canopy);
-    font-size: 0.98rem;
+  .proof-card dt {
+    font-size: 0.95rem;
     line-height: 1.4;
   }
-  .readout-source {
-    color: var(--on-canopy-muted);
+  .proof-value {
+    order: -1;
+    color: var(--color-foreground);
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
   }
-  @media (min-width: 1000px) {
-    .readouts {
-      grid-template-columns: 1.5fr repeat(4, 1fr);
-      gap: 0;
+  .proof-card:first-child {
+    grid-column: 1 / -1;
+    color: #ffffff;
+    background: var(--green-900);
+    border-color: var(--green-900);
+  }
+  .proof-card:first-child .proof-value {
+    color: #ffffff;
+    font-size: clamp(3.4rem, 10vw, 5.2rem);
+  }
+  .proof-card:first-child .label {
+    color: #dff3d2;
+  }
+  @media (min-width: 900px) {
+    .proof {
+      grid-template-columns: 1.6fr 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
     }
-    .readouts > div:first-child {
-      grid-column: auto;
+    .proof-card {
+      padding: 24px;
     }
-    .readouts > div {
-      padding-inline: 22px;
-      border-left: 1px solid var(--canopy-line);
-    }
-    .readouts > div:first-child {
-      padding-left: 0;
-      border-left: 0;
+    .proof-card:first-child {
+      grid-column: 1;
+      grid-row: 1 / 3;
     }
   }
 
-  /* Section heading block, shared by most sections */
-  .sec-head {
-    display: grid;
-    gap: 18px;
-    max-width: 860px;
-    margin-bottom: clamp(40px, 6vw, 72px);
-  }
-  .sec-head > p:not(.index) {
-    max-width: 60ch;
-    color: var(--muted);
-    font-size: 1.1rem;
-  }
-  .sec-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 24px;
-  }
-
-  /* 01 Cases */
+  /* 01 Cases: bento grid, 7/5 then 5/7 on wide screens */
   .cases {
     display: grid;
-    gap: clamp(64px, 9vw, 112px);
+    gap: 16px;
   }
-  .case-top {
+  .case {
     display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: end;
-    gap: 4px 20px;
-    padding-top: 14px;
-    border-top: 2px solid var(--ink);
+    grid-template-rows: auto 1fr;
+    gap: 24px;
+    padding: 16px 16px 24px;
+    cursor: pointer;
   }
-  .case-num {
-    grid-row: span 2;
-    font-size: clamp(4rem, 10vw, 7rem);
-    font-stretch: 72%;
-    font-weight: 800;
-    line-height: 0.8;
-  }
-  .case-top .mono {
-    color: var(--muted);
-  }
-  .case-top .case-period {
-    color: var(--ink);
-  }
-  .case-body {
+  .case-ev {
     display: grid;
-    gap: 28px;
-    margin-top: 28px;
+    min-height: 260px;
+    padding: clamp(16px, 3vw, 28px);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    container-type: inline-size;
   }
   .case-copy {
     display: grid;
     align-content: start;
     justify-items: start;
-    gap: 18px;
+    gap: 14px;
+    padding-inline: 8px;
+  }
+  .case-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .case-chip {
+    padding: 4px 12px;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 600;
   }
   .case-copy h3 {
-    font-size: clamp(1.8rem, 3.4vw, 2.7rem);
-    font-stretch: 80%;
-    font-weight: 800;
-    line-height: 1.02;
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
   }
-  .case-copy > p {
-    max-width: 58ch;
-    color: var(--muted);
+  .case-copy h3 a:focus-visible {
+    outline: none;
   }
-  .case-copy > .case-outcome {
+  .case:has(a:focus-visible) {
+    outline: 3px solid var(--color-ring);
+    outline-offset: 3px;
+  }
+  .case-summary {
+    color: var(--color-muted-foreground);
+  }
+  .case-outcome {
     display: grid;
     gap: 2px;
-    color: var(--ink);
-    font-size: 1.12rem;
-    font-weight: 650;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-md);
+    font-weight: 600;
   }
-  .case-outcome .mono {
-    color: var(--muted);
+  .case-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-weight: 600;
   }
-  .case-link {
-    margin-top: 6px;
+  .case-more :global(.icon) {
+    transition: transform var(--duration) ease;
   }
-  .case-ev {
-    display: grid;
-    min-height: 300px;
-    padding: clamp(20px, 4vw, 40px);
-    background: var(--panel);
-    border-radius: var(--radius-l);
+  .case:hover .case-more :global(.icon) {
+    transform: translateX(4px);
   }
-  @media (min-width: 960px) {
-    .case-body {
-      grid-template-columns: 5fr 6fr;
-      gap: 56px;
+  @media (min-width: 760px) {
+    .cases {
+      grid-template-columns: 1fr 1fr;
     }
-    .case:nth-child(even) .case-copy {
-      order: 2;
+  }
+  @media (min-width: 1100px) {
+    .cases {
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+    .case-1,
+    .case-4 {
+      grid-column: span 7;
+    }
+    .case-2,
+    .case-3 {
+      grid-column: span 5;
     }
   }
 
-  /* 03 Skills: sticky heading on wide screens */
+  /* CTA strip after the work */
+  .cta-strip {
+    display: grid;
+    gap: 16px 24px;
+    margin-top: 20px;
+    padding: clamp(20px, 3vw, 32px);
+    background: var(--color-card);
+  }
+  .cta-text {
+    display: grid;
+    gap: 4px;
+  }
+  .cta-text p {
+    color: var(--color-muted-foreground);
+  }
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (min-width: 960px) {
+    .cta-strip {
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+  }
+
+  /* 03 Skills */
   .skills {
     display: grid;
-    gap: 40px 80px;
+    gap: 16px;
   }
-  .skills-head {
+  .skill {
     display: grid;
     align-content: start;
-    gap: 18px;
+    gap: 14px;
+    padding: clamp(24px, 3vw, 32px);
   }
-  .skills-head > p:not(.index) {
-    max-width: 48ch;
-    color: var(--muted);
-    font-size: 1.1rem;
+  .skill p {
+    color: var(--color-muted-foreground);
   }
-  .skills-list li {
-    display: grid;
-    gap: 10px;
-    padding-block: 28px;
-    border-top: 1px solid var(--line-strong);
+  .skill .tags {
+    margin-top: 4px;
   }
-  .skills-list li:last-child {
-    border-bottom: 1px solid var(--line-strong);
-  }
-  .skills-list .mono {
-    color: var(--muted);
-  }
-  .skills-list h3 {
-    font-size: clamp(1.9rem, 3.4vw, 2.6rem);
-    font-stretch: 78%;
-    font-weight: 800;
-  }
-  .skills-list p:not(.mono) {
-    max-width: 56ch;
-  }
-  .skills-list .skills-tools {
-    color: var(--ink);
-  }
-  @media (min-width: 960px) {
+  @media (min-width: 900px) {
     .skills {
-      grid-template-columns: 0.9fr 1.1fr;
-    }
-    .skills-head {
-      position: sticky;
-      top: calc(var(--header) + 40px);
-      align-self: start;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
     }
   }
 
-  /* 04 Experience */
+  /* 04 Experience: timeline with a dot per job */
   .exp-section {
     padding-top: 0;
   }
-  .jobs {
-    border-top: 2px solid var(--ink);
-  }
-  .job {
+  .timeline {
+    position: relative;
     display: grid;
     gap: 16px;
-    padding-block: 32px;
-    border-bottom: 1px solid var(--line-strong);
+    padding-left: 28px;
   }
-  /* On a phone each role already shows its dates, so the span column is dropped */
-  .job-dates {
-    display: none;
-    color: var(--muted);
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 7px;
+    width: 2px;
+    background: var(--color-border);
+    border-radius: 2px;
   }
-  .job-org {
+  .job {
+    position: relative;
+  }
+  .tl-dot {
+    position: absolute;
+    top: 30px;
+    left: -28px;
+    width: 16px;
+    height: 16px;
+    background: var(--color-card);
+    border: 4px solid var(--color-primary);
+    border-radius: 50%;
+  }
+  .job:first-child .tl-dot {
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-primary-soft);
+  }
+  .job-card {
+    display: grid;
+    justify-items: start;
+    gap: 14px;
+    min-width: 0;
+  }
+  .job-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
+    gap: 12px 16px;
+    width: 100%;
   }
   .job-logo {
     display: grid;
     flex: none;
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
     place-items: center;
     overflow: hidden;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    font-family: var(--font-mono);
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-heading);
+    font-weight: 700;
   }
   .job-logo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  .job-org h3 {
-    font-size: clamp(1.4rem, 2.2vw, 1.75rem);
-  }
-  .job-place {
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-  .job-detail {
-    display: grid;
-    justify-items: start;
-    gap: 14px;
+  .job-org {
+    flex: 1 1 200px;
     min-width: 0;
   }
-  .job-detail > p {
-    max-width: 62ch;
-    color: var(--muted);
+  .job-place {
+    color: var(--color-muted-foreground);
+    font-size: 0.95rem;
+  }
+  .date-chip {
+    padding: 4px 12px;
+    color: var(--color-foreground);
+    background: var(--color-muted);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
   .job-roles {
     display: grid;
@@ -696,194 +829,215 @@ const campusPhotos = [classPhoto, ...defensePhotos];
     justify-content: space-between;
     gap: 2px 16px;
   }
-  .job-roles .mono {
-    color: var(--muted);
+  .job-note {
+    max-width: 68ch;
+    color: var(--color-muted-foreground);
   }
+  /* Every photo the same square tile; two per row on phones, one row of four from tablet up */
   .job-photos {
     display: grid;
-    grid-template-columns: 2fr 3fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
-    max-width: 560px;
     gap: 10px;
   }
   .job-photos > :global(.photo-link) {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-lg);
   }
-  .job-photos > :global(.photo-link:first-child) {
-    aspect-ratio: auto;
+  .job-photos > :global(.photo-link) :global(.photo-img) {
+    object-position: 50% 40%;
   }
-  @media (min-width: 960px) {
-    .job {
-      grid-template-columns: 170px 1fr 1.4fr;
-      gap: 32px;
-      align-items: start;
+  @media (min-width: 760px) {
+    .job-photos {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
     }
-    .job-dates {
-      display: block;
-      padding-top: 6px;
+  }
+  @media (min-width: 760px) {
+    .timeline {
+      padding-left: 40px;
     }
-    .job-org {
-      align-items: flex-start;
+    .timeline::before {
+      left: 11px;
+    }
+    .tl-dot {
+      left: -36px;
+    }
+    .job-card {
+      padding: 28px 32px;
     }
   }
 
   /* 05 Writing */
   .writing {
-    background: var(--panel);
+    background: var(--color-band);
   }
   .writing-grid {
     display: grid;
-    gap: 56px 72px;
+    gap: 48px 32px;
+  }
+  .writing-col {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 16px;
   }
   .list-title {
-    padding-bottom: 14px;
-    font-size: 1.15rem;
-    font-stretch: 100%;
-    font-weight: 650;
-    border-bottom: 2px solid var(--ink);
+    font-size: 1.1rem;
   }
-  .papers li {
+  .papers,
+  .builds {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .paper {
     display: grid;
     gap: 10px;
-    padding-block: 24px;
-    border-bottom: 1px solid var(--line-strong);
-  }
-  .papers .mono {
-    color: var(--muted);
+    padding-right: 56px;
+    cursor: pointer;
   }
   .paper-link {
-    display: inline;
-    font-size: clamp(1.3rem, 2.2vw, 1.6rem);
-    font-stretch: 86%;
-    font-weight: 750;
-    line-height: 1.15;
+    font-family: var(--font-heading);
+    font-size: clamp(1.15rem, 1.8vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.3;
   }
-  .paper-link :global(.icon) {
-    display: inline;
-    vertical-align: -0.1em;
+  .paper-link:focus-visible,
+  .build-name:focus-visible {
+    outline: none;
   }
-  .paper-link:hover {
-    color: var(--leaf);
-    text-decoration: underline;
-    text-underline-offset: 5px;
-  }
-  .paper-link:active {
-    opacity: 0.7;
+  .paper:has(a:focus-visible),
+  .build:has(a:focus-visible) {
+    outline: 3px solid var(--color-ring);
+    outline-offset: 3px;
   }
   .paper-desc {
-    color: var(--muted);
+    color: var(--color-muted-foreground);
   }
-  .builds {
-    margin-bottom: 12px;
+  .paper-icon {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    color: var(--color-primary);
   }
-  .builds a {
+  .build {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 16px;
-    padding-block: 18px;
-    border-bottom: 1px solid var(--line-strong);
+    align-content: start;
+    gap: 8px;
+    padding: 20px;
+    cursor: pointer;
+  }
+  .build-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .build .icon-tile {
+    width: 40px;
+    height: 40px;
   }
   .build-name {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1.2rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
     font-weight: 700;
   }
-  .builds .mono {
-    color: var(--muted);
-  }
   .build-body {
-    grid-column: 1 / -1;
-    color: var(--muted);
+    color: var(--color-muted-foreground);
+    font-size: 0.95rem;
   }
-  .builds a:hover .build-name {
-    color: var(--leaf);
-    text-decoration: underline;
-    text-underline-offset: 5px;
+  .writing-col > .text-link {
+    gap: 8px;
   }
-  .builds a:active {
-    opacity: 0.7;
+  @media (min-width: 640px) {
+    .builds {
+      grid-template-columns: 1fr 1fr;
+    }
   }
-  @media (min-width: 960px) {
+  @media (min-width: 1040px) {
     .writing-grid {
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr 1.1fr;
     }
   }
 
-  /* 06 Campus and capstone */
-  .campus {
+  /* 06 Beyond: photo + two cards, then the wedding band */
+  .beyond {
     display: grid;
-    gap: 32px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
-  .campus :global(.campus-photo) {
+  .beyond-photo :global(.campus-photo) {
+    width: 100%;
     aspect-ratio: 3 / 2;
-  }
-  .campus-text {
-    display: grid;
-    gap: 36px;
   }
   .edu,
   .capstone {
     display: grid;
-    justify-items: start;
     align-content: start;
-    gap: 12px;
+    justify-items: start;
+    gap: 10px;
   }
-  .edu > .mono,
-  .capstone > .mono {
-    color: var(--muted);
+  .edu h3,
+  .capstone h3 {
+    font-size: 1.3rem;
   }
-  .edu > p:not(.mono),
-  .capstone > p:not(.mono) {
-    color: var(--muted);
-  }
-  .capstone {
-    padding-top: 28px;
-    border-top: 1px solid var(--line-strong);
+  /* Padding keeps the title link a 44px tap target even on one line */
+  .capstone h3 a {
+    display: inline-block;
+    padding-block: 10px;
+    transition: color var(--duration) ease;
   }
   .capstone h3 a:hover {
-    color: var(--leaf);
+    color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 5px;
   }
-  .capstone h3 a:active {
-    opacity: 0.7;
-  }
   .certs {
+    display: grid;
     width: 100%;
+    gap: 6px;
+    margin-block: 4px;
   }
   .certs li {
-    padding-block: 9px;
-    border-top: 1px solid var(--line);
-    font-size: 0.98rem;
+    display: flex;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+  .certs :global(.icon) {
+    margin-top: 4px;
+    color: var(--color-primary);
   }
   .capstone-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0 20px;
+    gap: 0 18px;
   }
-  @media (min-width: 960px) {
-    .campus {
-      grid-template-columns: 1.15fr 1fr;
-      gap: 56px;
-      align-items: start;
+  @media (min-width: 900px) {
+    .beyond {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      gap: 20px;
     }
-    .campus :global(.campus-photo) {
-      position: sticky;
-      top: calc(var(--header) + 32px);
+    .beyond-photo {
+      grid-row: 1 / 3;
+    }
+    .beyond-photo :global(.campus-photo) {
+      height: 100%;
+      min-height: 360px;
+      aspect-ratio: auto;
     }
   }
 
-  /* Wedding: full-width photo; on wide screens the text sits on a scrim so it stays readable */
+  /* Wedding: full-width photo, text on a scrim on wide screens */
   .wedding {
     position: relative;
     display: grid;
-    margin-top: clamp(64px, 9vw, 112px);
+    margin-top: 20px;
     overflow: hidden;
-    color: #eef2ea;
-    background: #10140f;
-    border-radius: var(--radius-l);
+    color: #f1f7ec;
+    background: #0a1a09;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
   .wedding :global(.wedding-photo) {
     aspect-ratio: 3 / 2;
@@ -891,17 +1045,15 @@ const campusPhotos = [classPhoto, ...defensePhotos];
   }
   .wedding-text {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     padding: 24px;
   }
-  .wedding-text .mono,
-  .wedding-text p:not(.mono) {
-    color: #d3dbd5;
+  .wedding-text .label,
+  .wedding-text p:not(.label) {
+    color: #d1e7d8;
   }
   .wedding-text h3 {
-    font-size: clamp(1.9rem, 4vw, 3.2rem);
-    font-stretch: 78%;
-    font-weight: 800;
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
   }
   @media (min-width: 760px) {
     .wedding :global(.wedding-photo) {
@@ -912,7 +1064,7 @@ const campusPhotos = [classPhoto, ...defensePhotos];
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(90deg, rgba(8, 14, 10, 0.88) 0%, rgba(8, 14, 10, 0.55) 45%, rgba(8, 14, 10, 0) 75%);
+      background: linear-gradient(90deg, rgba(6, 18, 8, 0.88) 0%, rgba(6, 18, 8, 0.55) 45%, rgba(6, 18, 8, 0) 75%);
     }
     .wedding-text {
       position: absolute;
@@ -928,72 +1080,98 @@ const campusPhotos = [classPhoto, ...defensePhotos];
     }
   }
 
-  /* Contact */
-  .contact {
-    padding-block: clamp(80px, 11vw, 144px);
+  /* 07 Contact: a deep green card, fixed colours in both themes */
+  .contact-section {
+    padding-top: 0;
   }
-  .contact-inner {
+  .contact {
+    position: relative;
     display: grid;
-    gap: 36px;
+    gap: 32px;
+    overflow: hidden;
+    padding: clamp(28px, 6vw, 72px);
+    color: #ffffff;
+    background: var(--green-900);
+    border-radius: 32px;
+    box-shadow: var(--shadow-xl);
+  }
+  .contact::before,
+  .contact::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .contact::before {
+    top: -120px;
+    right: -80px;
+    width: 340px;
+    height: 340px;
+    background: rgba(40, 167, 69, 0.3);
+  }
+  .contact::after {
+    bottom: -140px;
+    left: 30%;
+    width: 280px;
+    height: 280px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .contact > * {
+    position: relative;
+    z-index: 1;
   }
   .contact-head,
   .contact-reach {
     display: grid;
     justify-items: start;
     align-content: start;
-    gap: 22px;
+    gap: 20px;
+  }
+  .contact .eyebrow {
+    color: #dff3d2;
+  }
+  .contact .eyebrow b {
+    color: var(--green-900);
+    background: #ffffff;
   }
   .contact h2 {
-    max-width: 14ch;
-  }
-  @media (min-width: 1040px) {
-    .contact-inner {
-      grid-template-columns: 1.05fr 1fr;
-      align-items: end;
-      gap: 64px;
-    }
-  }
-  .contact :global(.contact-meter) {
-    width: 0.62em;
-    margin-left: 0.25em;
-    color: var(--on-canopy-muted);
+    max-width: 16ch;
   }
   .contact-body {
     max-width: 52ch;
-    color: var(--on-canopy-muted);
-    font-size: 1.12rem;
+    color: #eef8e8;
+    font-size: 1.1rem;
   }
-  /* Padding keeps the link a 44px tap target even when the text is small */
+  /* Padding keeps the link a 44px tap target */
   .contact-email {
     display: inline-block;
     max-width: 100%;
-    padding-block: 8px;
-    font-size: clamp(1.75rem, 6.4vw, 4.6rem);
-    font-stretch: 75%;
-    font-weight: 800;
-    line-height: 1.1;
-    overflow-wrap: anywhere;
+    padding-block: 10px;
+    font-family: var(--font-heading);
+    font-size: clamp(1.4rem, 5.4vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    overflow-wrap: break-word;
     text-decoration: underline;
-    text-decoration-color: rgba(238, 242, 234, 0.4);
-    text-decoration-thickness: 0.06em;
-    text-underline-offset: 0.14em;
-    transition: text-decoration-color 160ms ease;
+    text-decoration-color: rgba(255, 255, 255, 0.4);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+    transition: text-decoration-color var(--duration) ease;
   }
   .contact-email:hover {
-    text-decoration-color: var(--fruit);
-  }
-  .contact-email:active {
-    opacity: 0.8;
+    text-decoration-color: #ffffff;
   }
   .contact-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 8px;
+    gap: 12px;
   }
   @media (min-width: 1040px) {
-    .contact-email {
-      font-size: clamp(2.2rem, 3.6vw, 3.4rem);
+    .contact {
+      grid-template-columns: 1.1fr 1fr;
+      align-items: end;
+      gap: 56px;
     }
   }
 </style>

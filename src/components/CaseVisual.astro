@@ -69,7 +69,7 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
         </li>
       ))}
     </ul>
-    <p class="mono ev-source">Accuracy: LFW benchmark, not field data. Size: model file. Bars start at zero.</p>
+    <p class="label ev-source">Accuracy: LFW benchmark, not field data. Size: model file. Bars start at zero.</p>
   </figure>
 )}
 
@@ -77,14 +77,14 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
   <figure class="ev ev-phases">
     <figcaption class="sr-only">How field data moved from NFC tags in Phase 1 to printed tickets in Phase 2</figcaption>
     <div class="phase">
-      <p class="mono">Phase 1 · {period[1]}</p>
+      <p class="label">Phase 1 · {period[1]}</p>
       <div class="nfc" aria-hidden="true">
         <svg viewBox="0 0 64 64"><rect x="6" y="6" width="52" height="52" rx="8" /><path d="M22 22c6 6 6 14 0 20M30 17c9 9 9 21 0 30M38 12c12 12 12 28 0 40" /></svg>
       </div>
       <p class="phase-what">{fieldData[1]}</p>
     </div>
     <div class="phase phase-now">
-      <p class="mono">Phase 2 · {period[2]}</p>
+      <p class="label">Phase 2 · {period[2]}</p>
       <div class="ticket" aria-hidden="true">
         <b>DO! IAM · HARVEST</b>
         <span>BLOCK ····· A01</span>
@@ -95,7 +95,7 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
         </svg>
       </div>
       <p class="phase-what">{fieldData[2]}</p>
-      <p class="mono ev-source">Ticket drawing uses sample values, not field data.</p>
+      <p class="label ev-source">Ticket drawing uses sample values, not field data.</p>
     </div>
   </figure>
 )}
@@ -105,12 +105,12 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     <div class="app">
       <p class="app-name">ePMS</p>
       <p>Planning, harvest and inspection for estate staff, with NFC data capture.</p>
-      <p class="mono">For estate staff</p>
+      <p class="label">For estate staff</p>
     </div>
     <div class="app">
       <p class="app-name">eTis</p>
       <p>Harvest order tickets for plasma and external growers selling fruit to ANJ.</p>
-      <p class="mono">For external growers · public on Google Play</p>
+      <p class="label">For external growers · public on Google Play</p>
     </div>
   </div>
 )}
@@ -136,28 +136,31 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     height: 100%;
     align-content: center;
   }
+  /* Two-column layouts below key off the wrapper's width (it sets container-type) */
   .ev-source {
-    color: var(--muted);
+    color: var(--color-muted-foreground);
   }
 
-  /* Benchmark bars */
+  /* Benchmark bars: the shipped model is the green bar, the rest stay neutral */
   .ev-chart {
-    gap: 18px;
+    gap: 16px;
   }
   .ev-chart figcaption,
   .ev-sub {
-    color: var(--muted);
+    color: var(--color-muted-foreground);
+    font-size: 0.95rem;
   }
   .ev-chart strong {
-    color: var(--ink);
-    font-weight: 650;
+    color: var(--color-foreground);
+    font-family: var(--font-heading);
+    font-weight: 600;
   }
   .ev-sub {
-    margin-top: 6px;
+    margin-top: 4px;
   }
   .bars {
     display: grid;
-    gap: 16px;
+    gap: 14px;
   }
   .bars li {
     display: grid;
@@ -171,45 +174,47 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     line-height: 1.3;
   }
   .bar-name small {
-    color: var(--muted);
+    color: var(--color-muted-foreground);
     font-size: 0.85rem;
     font-weight: 400;
   }
   .bar-value {
-    font-family: var(--font-mono);
-    font-weight: 500;
+    font-family: var(--font-heading);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
   }
   .chosen .bar-value {
-    font-family: var(--font-sans);
-    font-size: 2.2rem;
-    font-stretch: 78%;
-    font-weight: 800;
+    color: var(--color-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     line-height: 1;
-    color: var(--leaf);
   }
   .bar {
     grid-column: 1 / -1;
     width: 100%;
     height: 12px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
   }
   .bar-track {
-    fill: var(--line);
+    fill: var(--color-muted);
   }
   .bar-fill {
-    fill: var(--muted);
+    fill: color-mix(in srgb, var(--color-muted-foreground) 55%, var(--color-muted));
     transform-box: fill-box;
     transform-origin: left center;
   }
   .chosen .bar-fill {
-    fill: var(--leaf);
+    fill: var(--color-primary);
   }
   .bars-size .bar {
     height: 8px;
   }
-  /* Bars grow from zero once, when the chart enters view */
+  /* Bars grow from zero once, when the chart enters view (plain ease-out: this is data) */
   :global(.has-js) .ev-chart .bar-fill {
     transform: scaleX(0);
-    transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms;
+    transition: transform 900ms var(--ease-out) 200ms;
   }
   :global(.has-js) .ev-chart:global(.is-visible) .bar-fill {
     transform: none;
@@ -222,35 +227,35 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
   /* Phase comparison */
   .ev-phases {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
   .phase {
     display: grid;
     align-content: start;
-    gap: 14px;
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-  }
-  .phase > .mono {
-    color: var(--muted);
+    gap: 12px;
+    padding: 18px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
   }
   .phase-now {
-    border-color: var(--ink);
+    border: 2px solid var(--color-primary);
   }
   .phase-what {
-    font-weight: 650;
+    font-family: var(--font-heading);
+    font-weight: 600;
     line-height: 1.35;
   }
   .nfc svg {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
     fill: none;
-    stroke: var(--muted);
+    stroke: var(--color-muted-foreground);
     stroke-width: 3;
-    stroke-linecap: square;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
+  /* A drawn paper ticket, so it keeps paper colours in both themes */
   .ticket {
     display: grid;
     width: min(220px, 100%);
@@ -258,17 +263,17 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     padding: 14px 16px 18px;
     color: #1b1d18;
     background: #fbfaf5;
-    border: 1px solid rgba(14, 29, 22, 0.16);
-    border-radius: 4px 4px 0 0;
-    box-shadow: var(--lift);
-    font-family: var(--font-mono);
+    border: 1px solid rgba(31, 52, 12, 0.16);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-code);
     font-size: 0.82rem;
     line-height: 1.5;
     white-space: pre;
   }
   .ticket b {
     margin-bottom: 6px;
-    font-weight: 500;
+    font-weight: 600;
   }
   .barcode {
     width: 100%;
@@ -276,7 +281,7 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     margin-top: 10px;
     fill: #1b1d18;
   }
-  @media (min-width: 560px) {
+  @container (min-width: 440px) {
     .ev-phases {
       grid-template-columns: 1fr 1.2fr;
     }
@@ -284,24 +289,28 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
 
   /* Two apps */
   .ev-apps {
-    gap: 14px;
+    gap: 12px;
   }
   .app {
     display: grid;
-    gap: 8px;
-    padding: 22px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 14px;
+    gap: 6px;
+    padding: 20px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
   }
   .app-name {
-    font-size: clamp(2.4rem, 5vw, 3.4rem);
-    font-stretch: 75%;
-    font-weight: 800;
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
     line-height: 1;
   }
-  .app > .mono {
-    color: var(--muted);
+  @container (min-width: 440px) {
+    .ev-apps {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   /* Screenshots: phones lie on top of the panel, so they carry the shadow */
@@ -317,7 +326,7 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
   }
   .screen {
     width: 100%;
-    filter: drop-shadow(0 18px 24px rgba(6, 22, 15, 0.3));
+    filter: drop-shadow(0 16px 20px rgba(31, 52, 12, 0.25));
   }
   .screen-2 {
     transform: translateY(-6%);

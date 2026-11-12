@@ -1,9 +1,8 @@
-<!-- antislop:start -->
-## antislop
-For UI, copy, people, mobile layout, or code comments work, read these installed skill files directly (use these paths even if a same-named global skill exists):
-- Core filter, always on: `antislop`: `.claude/skills/antislop/SKILL.md`
-Before starting, follow the core's "Two Usage Modes" section in strict order: explicit session instruction first, then global preference, then ask. A session instruction always wins. For a resolved mode, say `antislop active: <mode> (session override).` or `antislop active: <mode> (global preference).` once before presenting findings or making edits, using the actual mode and source. Acknowledging the user's request without naming the source does not replace this notice.
-Only an explicit choice of antislop during or after selects a session mode. A request to review, audit, or avoid file edits does not select a mode; read the global preference in that case. Another skill's mode does not select antislop's mode.
-If the mode is unresolved, ask during/after and end the response; wait for the answer before any UI review, planning, or concept. For read-only tasks, put the active-mode notice only at the start of the final answer, never in progress messages. For editing tasks, announce before the first edit and omit it from the final answer.
-To update antislop later: `npx antislop-ai --update`, or run `npx antislop-ai` and pick Overwrite them.
-<!-- antislop:end -->
+## Design system: UI UX Pro Max
+This branch (`uiuxpromax`) is styled with the UI UX Pro Max skill. It does not use antislop or its DESIGN.md.
+For any UI, layout, colour, type or motion work:
+- Read the skill first: `.claude/skills/ui-ux-pro-max/SKILL.md`.
+- Follow `design-system/faishal-yusuf-baqir-portfolio/MASTER.md`. A page file in `design-system/faishal-yusuf-baqir-portfolio/pages/<page>.md`, when present, overrides it.
+- Tokens live in `src/styles/global.css` under the MASTER.md names (`--color-primary`, `--color-accent`, …). Add new colours there, not inline.
+- Before handing work back, run the Pre-Delivery Checklist at the end of MASTER.md (contrast 4.5:1, visible focus, reduced motion, 375/768/1024/1440 widths, no horizontal scroll).
+- To regenerate or extend the system: `python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<query>" --design-system -p "Faishal Yusuf Baqir Portfolio" --persist --output-dir .`

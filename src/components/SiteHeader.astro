@@ -2,21 +2,20 @@
 import Icon from './Icon.astro';
 import { profile } from '../data/site';
 
-// Every item points at a section that exists on the home page (R-24).
+// Every item points at a section that exists on the home page.
 const isHome = Astro.url.pathname === '/';
 const nav = [
   { label: 'Work', id: 'work' },
+  { label: 'Face check', id: 'face-check' },
   { label: 'Experience', id: 'experience' },
   { label: 'Writing', id: 'writing' },
-  { label: 'Contact', id: 'contact' },
 ].map((item) => ({ ...item, href: `${isHome ? '' : '/'}#${item.id}` }));
+const contactHref = `${isHome ? '' : '/'}#contact`;
 ---
 
-<header class="site-header on-canopy" data-header>
+<header class="site-header" data-header>
   <div class="bar shell">
-    <a class="wordmark" href="/" aria-label={`${profile.name}, home`}>
-      <span>{profile.name}</span>
-    </a>
+    <a class="wordmark" href="/" aria-label={`${profile.name}, home`}>{profile.name}</a>
 
     <nav class="nav-desktop" aria-label="Main">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
@@ -24,9 +23,11 @@ const nav = [
 
     <div class="actions">
       <button class="icon-btn" type="button" data-theme-toggle aria-label="Use dark theme">
-        <span class="when-light"><Icon name="moon" size={19} /></span>
-        <span class="when-dark"><Icon name="sun" size={19} /></span>
+        <span class="when-light"><Icon name="moon" size={20} /></span>
+        <span class="when-dark"><Icon name="sun" size={20} /></span>
       </button>
+      <!-- Sticky call to action (MASTER.md pattern: CTA in the hero, kept in the header) -->
+      <a class="btn btn-primary btn-sm header-cta" href={contactHref}>Contact <Icon name="arrow-right" size={18} /></a>
       <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu-panel" aria-label="Open menu">
         <span class="when-closed"><Icon name="menu" /></span>
         <span class="when-open"><Icon name="close" /></span>
@@ -36,11 +37,12 @@ const nav = [
 
   <nav class="menu-panel" id="menu-panel" aria-label="Main, mobile" data-menu-panel hidden>
     <ul class="shell">
-      {nav.map((item, i) => (
-        <li><a href={item.href}><span class="mono" aria-hidden="true">0{i + 1}</span>{item.label}</a></li>
+      {nav.map((item) => (
+        <li><a class="menu-link" href={item.href}>{item.label}<Icon name="next" size={20} /></a></li>
       ))}
-      <li class="menu-resume">
-        <a class="btn btn-fruit" href={profile.resume} target="_blank" rel="noopener">Download résumé (PDF) <Icon name="download" size={18} /></a>
+      <li class="menu-actions">
+        <a class="btn btn-primary" href={contactHref}>Contact me</a>
+        <a class="btn btn-secondary" href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={18} /></a>
       </li>
     </ul>
   </nav>
@@ -69,6 +71,11 @@ const nav = [
     syncThemeLabel();
   });
 
+  // A shadow appears under the header once the page scrolls.
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   // Mobile menu: a disclosure. Escape, a link click or a wide screen closes it.
   const setMenu = (open: boolean) => {
     if (!menuBtn || !panel || !header) return;
@@ -85,7 +92,7 @@ const nav = [
       menuBtn?.focus();
     }
   });
-  matchMedia('(min-width: 860px)').addEventListener('change', (event) => {
+  matchMedia('(min-width: 960px)').addEventListener('change', (event) => {
     if (event.matches) setMenu(false);
   });
 </script>
@@ -95,72 +102,86 @@ const nav = [
     position: sticky;
     z-index: 50;
     top: 0;
-    border-bottom: 1px solid var(--canopy-line);
+    background: color-mix(in srgb, var(--color-background) 88%, transparent);
+    border-bottom: 1px solid transparent;
+    -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    backdrop-filter: saturate(1.4) blur(12px);
+    transition:
+      border-color var(--duration) ease,
+      box-shadow var(--duration) ease;
+  }
+  .site-header.is-scrolled,
+  .site-header.menu-open {
+    border-bottom-color: var(--color-border);
+    box-shadow: var(--shadow-sm);
   }
   .bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     height: var(--header);
   }
+  /* Name only, no logo mark */
   .wordmark {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    font-size: 1.22rem;
-    font-stretch: 80%;
-    font-weight: 800;
-    letter-spacing: 0.005em;
+    margin-right: auto;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: color var(--duration) ease;
   }
-  .wordmark:hover span {
-    text-decoration: underline;
-    text-decoration-color: var(--fruit);
-    text-decoration-thickness: 3px;
-    text-underline-offset: 6px;
+  .wordmark:hover {
+    color: var(--color-primary);
   }
   .nav-desktop {
     display: none;
-    gap: 4px;
-    margin-left: auto;
+    gap: 2px;
   }
   .nav-desktop a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
     padding-inline: 14px;
-    color: var(--on-canopy-muted);
-    border-radius: var(--radius-m);
-    font-weight: 550;
-    transition: color 140ms ease, background-color 140ms ease;
+    color: var(--color-muted-foreground);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    transition:
+      color var(--duration) ease,
+      background-color var(--duration) ease;
   }
   .nav-desktop a:hover {
-    color: var(--on-canopy);
-    background: rgba(238, 242, 234, 0.08);
-  }
-  .nav-desktop a:active {
-    background: rgba(238, 242, 234, 0.16);
+    color: var(--color-foreground);
+    background: var(--color-primary-soft);
   }
   .actions {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-cta {
+    display: none;
   }
   .icon-btn {
     display: grid;
     width: 44px;
     height: 44px;
     place-items: center;
-    color: var(--on-canopy);
-    border: 1px solid var(--canopy-line);
-    border-radius: 50%;
-    transition: background-color 140ms ease, border-color 140ms ease;
+    color: var(--color-foreground);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition:
+      background-color var(--duration) ease,
+      border-color var(--duration) ease;
   }
   .icon-btn:hover {
-    background: rgba(238, 242, 234, 0.1);
-    border-color: rgba(238, 242, 234, 0.5);
-  }
-  .icon-btn:active {
-    background: rgba(238, 242, 234, 0.2);
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
   }
   .when-dark,
   .when-open {
@@ -179,38 +200,43 @@ const nav = [
     display: block;
   }
 
-  .menu-panel {
-    border-top: 1px solid var(--canopy-line);
-  }
   .menu-panel ul {
     display: grid;
+    gap: 4px;
     padding-block: 8px 24px;
   }
-  .menu-panel li:not(.menu-resume) a {
+  .menu-link {
     display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding-block: 12px;
-    border-bottom: 1px solid var(--canopy-line);
-    font-size: 2rem;
-    font-stretch: 78%;
-    font-weight: 800;
-    line-height: 1.1;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding-inline: 16px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: background-color var(--duration) ease;
   }
-  .menu-panel .mono {
-    color: var(--on-canopy-muted);
+  .menu-link:hover {
+    background: var(--color-primary-soft);
   }
-  .menu-panel a:active {
-    opacity: 0.75;
+  .menu-link :global(.icon) {
+    color: var(--color-primary);
   }
-  .menu-resume {
-    margin-top: 20px;
-  }
-  .menu-resume .btn {
-    width: 100%;
+  .menu-actions {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
   }
 
-  @media (min-width: 860px) {
+  @media (min-width: 600px) {
+    .header-cta {
+      display: inline-flex;
+    }
+  }
+  @media (min-width: 960px) {
     .nav-desktop {
       display: flex;
     }

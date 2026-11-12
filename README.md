@@ -25,7 +25,7 @@ npm run preview  # serve the built site
 | Evidence next to each case study (chart, phases, apps, screenshots) | `src/components/CaseVisual.astro` |
 | Interactive face check band | `src/components/FaceCheck.astro` |
 | Photo viewer and photo link | `src/components/Viewer.astro`, `src/components/PhotoLink.astro` |
-| Design direction: palette, type, motif, motion | `DESIGN.md` |
+| Design system (UI UX Pro Max): palette, type, components, motion, checklist | `design-system/faishal-yusuf-baqir-portfolio/MASTER.md` |
 | Colour and type tokens | `src/styles/global.css` |
 | CV and portfolio PDFs | `public/faishal-yusuf-baqir-cv.pdf`, `public/faishal-yusuf-baqir-portfolio.pdf` |
 | Social share image | `scripts/og-cover.html` → `public/og-cover.png` (`npm run og`, needs Google Chrome) |
