@@ -6,6 +6,7 @@
  */
 import { Image } from 'astro:assets';
 import { appScreens } from '../data/photos';
+import ticketQr from '../assets/ticket-qr.png';
 import { caseStudies } from '../data/site';
 
 interface Props {
@@ -30,13 +31,6 @@ const phases = caseStudies.find((item) => item.slug === 'do-iam-field-operations
 const phaseRow = (label: string) => phases?.rows.find((row) => row[0] === label) ?? ['', '', ''];
 const period = phaseRow('Period');
 const fieldData = phaseRow('Field data');
-// Barcode strip on the drawn ticket: fixed widths so every build draws the same code.
-const barcode = [2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 3, 1, 2, 2, 1, 3, 1, 1, 2];
-const barcodeRects = barcode.reduce<{ x: number; w: number }[]>((acc, w, i) => {
-  const x = acc.length ? acc[acc.length - 1].x + acc[acc.length - 1].w + (i % 3 === 0 ? 2 : 1.5) : 0;
-  return [...acc, { x, w }];
-}, []);
-const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barcodeRects.length - 1].w;
 ---
 
 {type === 'face' && (
@@ -90,9 +84,7 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
         <span>BLOCK ····· A01</span>
         <span>BUNCHES ···· 84</span>
         <span>LOOSE ··· 12 kg</span>
-        <svg class="barcode" viewBox={`0 0 ${barcodeWidth} 10`} preserveAspectRatio="none">
-          {barcodeRects.map((r) => <rect x={r.x} width={r.w} height="10" />)}
-        </svg>
+        <Image class="ticket-qr" src={ticketQr} alt="" width={176} />
       </div>
       <p class="phase-what">{fieldData[2]}</p>
       <p class="label ev-source">Ticket drawing uses sample values, not field data.</p>
@@ -275,11 +267,14 @@ const barcodeWidth = barcodeRects[barcodeRects.length - 1].x + barcodeRects[barc
     margin-bottom: 6px;
     font-weight: 600;
   }
-  .barcode {
-    width: 100%;
-    height: 22px;
+  /* QR code printed at the foot of the ticket (the real tickets carry a QR, not a barcode) */
+  .ticket-qr {
+    justify-self: center;
+    width: 88px;
+    height: auto;
     margin-top: 10px;
-    fill: #1b1d18;
+    image-rendering: pixelated;
+    mix-blend-mode: multiply; /* the QR's white sits into the paper colour */
   }
   @container (min-width: 440px) {
     .ev-phases {
