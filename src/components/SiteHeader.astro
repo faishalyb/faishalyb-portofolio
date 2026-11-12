@@ -13,7 +13,8 @@ const nav = [
 const contactHref = `${isHome ? '' : '/'}#contact`;
 ---
 
-<header class="site-header" data-header>
+<!-- On the home page the header starts clear, over the estate scene, and turns solid once the page moves past it -->
+<header class:list={['site-header', { 'on-scene': isHome }]} data-header>
   <div class="bar shell">
     <a class="wordmark" href="/" aria-label={`${profile.name}, home`}>{profile.name}</a>
 
@@ -22,7 +23,7 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
     </nav>
 
     <div class="actions">
-      <button class="icon-btn" type="button" data-theme-toggle aria-label="Use dark theme">
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Use light theme">
         <span class="when-light"><Icon name="moon" size={20} /></span>
         <span class="when-dark"><Icon name="sun" size={20} /></span>
       </button>
@@ -54,7 +55,7 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
   const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
   const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
 
-  // Theme: light by default; the visitor's choice from the toggle is remembered.
+  // Theme: dark by default; the visitor's choice from the toggle is remembered.
   const syncThemeLabel = () => {
     const dark = document.documentElement.dataset.theme === 'dark';
     themeBtn?.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');
@@ -71,10 +72,18 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
     syncThemeLabel();
   });
 
-  // A shadow appears under the header once the page scrolls.
-  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
+  // A shadow appears under the header once the page scrolls. Over the home scene the header
+  // stays clear until the section after the scene reaches it.
+  const afterScene = document.querySelector<HTMLElement>('[data-scene-end]');
+  const onScroll = () => {
+    if (!header) return;
+    const onScene = afterScene ? afterScene.getBoundingClientRect().top > header.offsetHeight : false;
+    header.classList.toggle('on-scene', onScene);
+    header.classList.toggle('is-scrolled', !onScene && window.scrollY > 8);
+  };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
 
   // Mobile menu: a disclosure. Escape, a link click or a wide screen closes it.
   const setMenu = (open: boolean) => {
@@ -107,6 +116,7 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
     -webkit-backdrop-filter: saturate(1.4) blur(12px);
     backdrop-filter: saturate(1.4) blur(12px);
     transition:
+      background-color 300ms ease,
       border-color var(--duration) ease,
       box-shadow var(--duration) ease;
   }
@@ -114,6 +124,18 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
   .site-header.menu-open {
     border-bottom-color: var(--color-border);
     box-shadow: var(--shadow-sm);
+  }
+  /*
+   * Clear over the estate scene. Only with JavaScript, which turns it solid again further down;
+   * the open mobile menu still needs its own surface.
+   */
+  :global(.has-js) .site-header.on-scene:not(.menu-open) {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :global(.has-js) .site-header.on-scene .nav-desktop a {
+    color: var(--color-foreground);
   }
   .bar {
     display: flex;
@@ -128,9 +150,10 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
     min-height: 44px;
     margin-right: auto;
     font-family: var(--font-heading);
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     white-space: nowrap;
     transition: color var(--duration) ease;
   }
@@ -149,7 +172,10 @@ const contactHref = `${isHome ? '' : '/'}#contact`;
     color: var(--color-muted-foreground);
     border-radius: var(--radius-full);
     font-family: var(--font-heading);
+    font-size: 0.78rem;
     font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     transition:
       color var(--duration) ease,
       background-color var(--duration) ease;

@@ -1,0 +1,800 @@
+---
+/**
+ * Home hero: a palm oil estate at first light, scrubbed by the scroll.
+ * The page starts in mist; scrolling clears it, lifts the sun over the ridge, sets six
+ * parallax layers of oil palms, brings the headline in, then a field worker with a phone.
+ *
+ * Everything is drawn in SVG from src/lib/palm.ts at build time, in the theme's scene tokens
+ * (src/styles/global.css, --scene-*). No inline styles: the site's CSP blocks them, so the
+ * script writes through the CSSOM and the markup uses SVG attributes.
+ *
+ * Without JavaScript, or with reduced motion, the section is one screen tall and shows the
+ * cleared scene with the headline.
+ */
+import Icon from './Icon.astro';
+import { bigFrond, palm, ridge, scatter, seeded, tinyPalm, undergrowth } from '../lib/palm';
+import { pageCopy } from '../data/site';
+
+// "no signal." is set in wide capitals; the full stop is kept for screen readers only.
+const mark = pageCopy.heroTitle.mark.replace(/\.$/, '');
+const markEnd = pageCopy.heroTitle.mark.endsWith('.') ? '.' : '';
+
+// Three levels of detail: close palms carry every leaflet, the far rows are flat shapes.
+const nearPalms = [
+  palm({ seed: 11, height: 300, width: 36, reach: 240, fronds: 28, samples: 18, lean: 0.03 }),
+  palm({ seed: 29, height: 250, width: 38, reach: 230, fronds: 26, samples: 18, lean: -0.04 }),
+];
+const midPalms = [
+  palm({ seed: 5, height: 280, width: 34, reach: 220, fronds: 18, samples: 10, lean: 0.02 }),
+  palm({ seed: 8, height: 240, width: 36, reach: 215, fronds: 17, samples: 10, lean: -0.03 }),
+];
+const farPalms = [tinyPalm(3), tinyPalm(7)];
+
+type Tree = { x: number; y: number; s: string; v: number };
+/** Trees planted along a line, the way an estate plants them: evenly, with a little drift. */
+const plant = (seed: number, x0: number, x1: number, gap: number, y: number, scale: number, drift: number): Tree[] => {
+  const rand = seeded(seed);
+  const trees: Tree[] = [];
+  for (let x = x0; x <= x1; x += gap * (0.82 + rand() * 0.36)) {
+    const s = scale * (0.86 + rand() * 0.28);
+    trees.push({
+      x: Math.round(x),
+      y: Math.round(y + (rand() - 0.5) * drift),
+      s: `${(rand() < 0.5 ? -s : s).toFixed(3)} ${s.toFixed(3)}`,
+      v: rand() < 0.5 ? 0 : 1,
+    });
+  }
+  return trees;
+};
+const place = (t: Tree) => `translate(${t.x} ${t.y}) scale(${t.s})`;
+
+// The scene is drawn on a 1600 × 900 board, anchored to the bottom of the stage.
+const horizon = plant(21, -40, 1640, 26, 566, 0.22, 4);
+const rowsBack = plant(33, -40, 1640, 52, 594, 0.62, 5);
+const rowsFront = plant(47, -10, 1640, 84, 622, 0.26, 6);
+// Spaced by hand so the sun comes up in the gap between two crowns.
+const mid: Tree[] = [
+  { x: -30, y: 694, s: '0.56 0.56', v: 0 },
+  { x: 232, y: 686, s: '-0.5 0.5', v: 1 },
+  { x: 486, y: 692, s: '0.54 0.54', v: 0 },
+  { x: 742, y: 688, s: '-0.5 0.5', v: 1 },
+  { x: 1068, y: 690, s: '0.52 0.52', v: 0 },
+  { x: 1322, y: 686, s: '-0.55 0.55', v: 1 },
+  { x: 1596, y: 694, s: '0.54 0.54', v: 0 },
+];
+const near: Tree[] = [
+  { x: 120, y: 792, s: '1.02 1.02', v: 0 },
+  { x: 418, y: 772, s: '-0.74 0.74', v: 1 },
+  { x: 1236, y: 776, s: '0.8 0.8', v: 1 },
+  { x: 1500, y: 796, s: '-1.08 1.08', v: 0 },
+];
+
+const ground = {
+  far: ridge({ seed: 2, x0: -80, x1: 1680, y: 562, rough: 9, step: 40, floor: 1500 }),
+  rows: ridge({ seed: 4, x0: -80, x1: 1680, y: 606, rough: 7, step: 40, floor: 1500 }),
+  mid: ridge({ seed: 6, x0: -80, x1: 1680, y: 690, rough: 12, step: 40, floor: 1500 }),
+  near: ridge({ seed: 9, x0: -80, x1: 1680, y: 786, rough: 12, step: 40, floor: 1500 }),
+};
+const brush = {
+  mid: undergrowth({ seed: 13, x0: -40, x1: 1640, y: 690, height: 22, gap: 26 }),
+  near: undergrowth({ seed: 17, x0: -40, x1: 1640, y: 786, height: 40, gap: 30 }),
+  front: undergrowth({ seed: 19, x0: 250, x1: 1160, y: 768, height: 46, gap: 22 }),
+};
+// The knoll the worker stands on: a low rise that falls away to both sides.
+const knoll = 'M180 1500L180 880C330 850 480 742 690 740C860 742 990 830 1180 884L1180 1500Z';
+
+const stars = scatter({ seed: 41, count: 90, x0: -100, x1: 1700, y0: -500, y1: 430, r0: 0.6, r1: 1.9 });
+const motes = [0, 1, 2].map((i) => scatter({ seed: 60 + i, count: 11, x0: 60, x1: 1540, y0: 240, y1: 840, r0: 1.2, r1: 3 }));
+
+// Foreground fronds that rise from the two bottom corners and frame the view.
+const frame = {
+  left: [
+    bigFrond({ seed: 3, angle: 8, length: 640, droop: 52, samples: 30, leaf: 190 }),
+    bigFrond({ seed: 4, angle: 34, length: 560, droop: 46, samples: 27, leaf: 170 }),
+    bigFrond({ seed: 6, angle: 62, length: 470, droop: 40, samples: 24, leaf: 150 }),
+  ],
+  right: [
+    bigFrond({ seed: 12, angle: -12, length: 600, droop: 56, samples: 29, leaf: 185 }),
+    bigFrond({ seed: 14, angle: -38, length: 540, droop: 44, samples: 26, leaf: 170 }),
+    bigFrond({ seed: 16, angle: -66, length: 440, droop: 38, samples: 23, leaf: 145 }),
+  ],
+};
+---
+
+<section class="hero" data-hero aria-labelledby="hero-title">
+  <div class="stage" data-stage>
+    <div class="dawn" data-dawn aria-hidden="true"></div>
+
+    <div class="scene" data-scene aria-hidden="true">
+      <!-- Shared shapes and gradients; the layers below reference them -->
+      <svg class="defs" width="0" height="0" focusable="false">
+        <defs>
+          {nearPalms.map((p, i) => (
+            <g id={`palm-near-${i}`}>
+              <path class="pf" d={p.fill} />
+              <path class="ps ps-near" d={p.stroke} />
+            </g>
+          ))}
+          {midPalms.map((p, i) => (
+            <g id={`palm-mid-${i}`}>
+              <path class="pf" d={p.fill} />
+              <path class="ps ps-mid" d={p.stroke} />
+            </g>
+          ))}
+          {farPalms.map((d, i) => <path id={`palm-far-${i}`} class="pf" d={d} />)}
+          <radialGradient id="sun-glow">
+            <stop class="glow-0" offset="0" />
+            <stop class="glow-1" offset="0.32" />
+            <stop class="glow-2" offset="1" />
+          </radialGradient>
+          <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+            <stop class="haze-0" offset="0" />
+            <stop class="haze-1" offset="1" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <svg class="layer l-stars" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {stars.map(([x, y, r]) => <circle cx={x} cy={y} r={r} />)}
+      </svg>
+
+      <svg class="layer l-sun" data-layer="sun" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        <circle cx="900" cy="468" r="560" fill="url(#sun-glow)" />
+        <circle class="sun" cx="900" cy="468" r="112" />
+      </svg>
+
+      <svg class="layer l-far" data-layer="far" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {horizon.map((t) => <use href={`#palm-far-${t.v}`} transform={place(t)} />)}
+        <path class="pf" d={ground.far} />
+        <rect class="haze" x="-80" y="520" width="1760" height="120" fill="url(#haze)" />
+      </svg>
+
+      <svg class="layer l-rows" data-layer="rows" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {rowsBack.map((t) => <use href={`#palm-far-${t.v}`} transform={place(t)} />)}
+        {rowsFront.map((t) => <use href={`#palm-mid-${t.v}`} transform={place(t)} />)}
+        <path class="pf" d={ground.rows} />
+        <rect class="haze" x="-80" y="570" width="1760" height="150" fill="url(#haze)" />
+      </svg>
+
+      <svg class="layer l-mid" data-layer="mid" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {mid.map((t) => <use href={`#palm-mid-${t.v}`} transform={place(t)} />)}
+        <path class="pf" d={ground.mid} />
+        <path class="ps ps-brush" d={brush.mid} />
+        <rect class="haze" x="-80" y="640" width="1760" height="180" fill="url(#haze)" />
+      </svg>
+
+      <svg class="layer l-near" data-layer="near" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {near.map((t) => <use href={`#palm-near-${t.v}`} transform={place(t)} />)}
+        <path class="pf" d={ground.near} />
+        <path class="ps ps-brush" d={brush.near} />
+      </svg>
+
+      <svg class="layer l-motes" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        {motes.map((group, i) => (
+          <g class={`motes motes-${i + 1}`}>{group.map(([x, y, r]) => <circle cx={x} cy={y} r={r} />)}</g>
+        ))}
+      </svg>
+
+      <svg class="layer l-front" data-layer="front" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+        <path class="pf" d={knoll} />
+        <path class="ps ps-brush" d={brush.front} />
+        <!-- A field worker reading a phone, facing the sun. Feet at 690, 742. -->
+        <g class="worker" transform="translate(690 744) scale(1.22)">
+          <path class="limb leg" d="M-4-84L-7-6M6-84L9-6" />
+          <path class="pf" d="M-14-8h17v8h-17zM3-8h17a4 4 0 0 1 4 4v4h-21z" />
+          <path class="pf" d="M-12-134Q1-140 14-133L12-80L-10-80Z" />
+          <path class="pf" d="M-22-130q-3-1-3 3v26q0 4 4 4h11v-33z" />
+          <path class="limb arm" d="M11-129L13-104L30-115" />
+          <rect class="phone-light" x="24.5" y="-131" width="12" height="21" rx="3" transform="rotate(14 30 -120)" />
+          <rect class="pf" x="26.5" y="-129" width="7.5" height="16" rx="1.6" transform="rotate(14 30 -120)" />
+          <rect class="pf" x="1" y="-143" width="8" height="10" />
+          <circle class="pf" cx="6" cy="-151" r="10" />
+          <path class="pf" d="M-7-151A13 14 0 0 1 18-153L26-151L26-148L-7-148Z" />
+        </g>
+      </svg>
+
+      <svg class="frond frond-left" data-frond="left" viewBox="0 0 700 700" focusable="false">
+        <g transform="translate(-30 760)">{frame.left.map((d) => <path class="pf" d={d} />)}</g>
+      </svg>
+      <svg class="frond frond-right" data-frond="right" viewBox="0 0 700 700" focusable="false">
+        <g transform="translate(730 760)">{frame.right.map((d) => <path class="pf" d={d} />)}</g>
+      </svg>
+    </div>
+
+    <div class="mist" aria-hidden="true">
+      <span class="veil" data-veil></span>
+      <span class="drift drift-1" data-drift></span>
+      <span class="drift drift-2" data-drift></span>
+    </div>
+
+    <div class="intro" data-intro>
+      <p class="intro-kicker">Flutter apps for palm oil estates</p>
+      <p class="intro-cue">Scroll to clear the mist</p>
+      <span class="intro-arrow" aria-hidden="true"><Icon name="arrow-down" size={18} /></span>
+    </div>
+
+    <div class="title-wrap" data-title>
+      <h1 class="title" id="hero-title">
+        <span class="title-lead">{pageCopy.heroTitle.lead}</span>
+        <span class="title-mark">{mark}{markEnd && <span class="sr-only">{markEnd}</span>}</span>
+      </h1>
+    </div>
+
+    <!-- Field readouts. Decorative: the clock and the sun's height follow the scroll. -->
+    <div class="hud" aria-hidden="true">
+      <i class="corner c-tl"></i><i class="corner c-tr"></i><i class="corner c-bl"></i><i class="corner c-br"></i>
+      <p class="hud-item hud-tl" data-hud="top">
+        <b><span data-clock>05:48</span> WIB</b>
+        <span>Field clock</span>
+      </p>
+      <p class="hud-item hud-tr" data-hud="top">
+        <b>Sun elev <span data-elev>12.4</span>°</b>
+        <span>Above the ridge</span>
+      </p>
+      <p class="hud-item hud-bl" data-hud="low">
+        <svg class="bars" viewBox="0 0 26 18" focusable="false">
+          <rect x="1" y="12" width="4" height="5" rx="1" /><rect x="8" y="8" width="4" height="9" rx="1" /><rect x="15" y="4" width="4" height="13" rx="1" /><rect x="22" y="0.8" width="3.2" height="16.2" rx="1" />
+        </svg>
+        <span>Estate block A01 · Signal 0/4 · Works offline</span>
+      </p>
+      <p class="hud-item hud-br" data-hud="low"><span>Scroll</span><Icon name="arrow-down" size={14} /></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { clamp, ease, range, reducedMotion, scrub } from '../scripts/scrub';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const stage = hero?.querySelector<HTMLElement>('[data-stage]');
+
+  if (hero && stage && !reducedMotion.matches) {
+    const one = <T extends Element = HTMLElement>(sel: string) => hero.querySelector<T>(sel);
+    const all = <T extends Element = HTMLElement>(sel: string) => Array.from(hero.querySelectorAll<T>(sel));
+    const layer = (name: string) => one<SVGSVGElement>(`[data-layer="${name}"]`);
+
+    const scene = one('[data-scene]');
+    const dawn = one('[data-dawn]');
+    const veil = one('[data-veil]');
+    const drifts = all('[data-drift]');
+    const intro = one('[data-intro]');
+    const title = one('[data-title]');
+    const hudTop = all('[data-hud="top"]');
+    const hudLow = all('[data-hud="low"]');
+    const clock = one('[data-clock]');
+    const elev = one('[data-elev]');
+    const frondLeft = one<SVGSVGElement>('[data-frond="left"]');
+    const frondRight = one<SVGSVGElement>('[data-frond="right"]');
+    const sun = layer('sun');
+    // How far each layer starts below its place, and how far it climbs as the page moves on, in % of the stage.
+    const depth: [SVGSVGElement | null, number, number][] = [
+      [layer('far'), 2.5, 1.5],
+      [layer('rows'), 4.5, 3],
+      [layer('mid'), 8, 5],
+      [layer('near'), 13, 8],
+    ];
+    const front = layer('front');
+    // Height of the mist band ahead of the next section, in screens (.log::before in index.astro).
+    const MIST = 0.3;
+    const blurOk = matchMedia('(min-width: 900px) and (hover: hover)').matches;
+    let lastClock = '';
+    let lastElev = '';
+
+    scrub(
+      () => {
+        // p: 0 → 1 while the scene plays; out: 0 → 1 while the next section (and the band of
+        // mist ahead of it, MIST screens tall) slides over the still-pinned stage.
+        const view = stage.offsetHeight;
+        const cover = view * (1 + MIST);
+        const run = hero.offsetHeight - view - cover;
+        const y = -hero.getBoundingClientRect().top;
+        return clamp(y / run) + clamp((y - run) / cover);
+      },
+      (value) => {
+        const p = Math.min(value, 1);
+        const out = Math.max(value - 1, 0);
+
+        // The mist lifts.
+        const clear = ease.inOut(range(p, 0, 0.3));
+        if (veil) veil.style.opacity = String(1 - clear);
+        drifts.forEach((el) => (el.style.opacity = String(1 - 0.72 * range(p, 0.05, 0.4))));
+        if (scene && blurOk) scene.style.filter = clear < 1 ? `blur(${((1 - clear) * 9).toFixed(2)}px)` : 'none';
+        if (dawn) dawn.style.opacity = String(0.25 + 0.75 * range(p, 0, 0.6));
+        if (intro) {
+          intro.style.opacity = String(1 - range(p, 0.02, 0.13));
+          intro.style.transform = `translate3d(0, ${(-28 * range(p, 0, 0.13)).toFixed(1)}px, 0)`;
+          intro.style.visibility = p > 0.14 ? 'hidden' : 'visible';
+        }
+
+        // The layers settle into place, the near ones travelling furthest; later they climb past.
+        const settle = 1 - ease.out(range(p, 0, 0.56));
+        for (const [el, start, climb] of depth) {
+          if (el) el.style.transform = `translate3d(0, ${(start * settle - climb * out).toFixed(3)}%, 0)`;
+        }
+
+        // Sunrise.
+        const rise = ease.out(range(p, 0.06, 0.64));
+        if (sun) sun.style.transform = `translate3d(0, ${((1 - rise) * 27 - out * 1).toFixed(3)}%, 0)`;
+        const elevText = (rise * 12.4).toFixed(1);
+        if (elev && elevText !== lastElev) elev.textContent = lastElev = elevText;
+        const minutes = Math.round(5 * 60 + 10 + range(p, 0, 1) * 50);
+        const clockText = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+        if (clock && clockText !== lastClock) clock.textContent = lastClock = clockText;
+
+        // Headline in, hold, then out before the foreground arrives.
+        if (title) {
+          const tin = ease.out(range(p, 0.24, 0.46));
+          const tout = range(p, 0.62, 0.76);
+          title.style.opacity = String(tin * (1 - tout));
+          title.style.transform = `translate3d(0, ${((1 - tin) * 28 - tout * 36).toFixed(1)}px, 0) scale(${(1.06 - 0.06 * tin).toFixed(4)})`;
+          title.style.visibility = tout >= 1 || tin <= 0 ? 'hidden' : 'visible';
+        }
+
+        // Readouts.
+        const top = range(p, 0.14, 0.3) * (1 - out);
+        hudTop.forEach((el) => (el.style.opacity = String(top)));
+        const low = range(p, 0.24, 0.38) * (1 - range(out, 0, 0.3));
+        hudLow.forEach((el) => (el.style.opacity = String(low)));
+
+        // The worker walks up onto the knoll; fronds close the frame from both corners.
+        const walk = ease.out(range(p, 0.52, 0.88));
+        if (front) front.style.transform = `translate3d(0, ${((1 - walk) * 46 - out * 12).toFixed(3)}%, 0)`;
+        const close = ease.out(range(p, 0.6, 0.94));
+        if (frondLeft) frondLeft.style.transform = `translate3d(${((close - 1) * 46).toFixed(2)}%, ${((1 - close) * 52 - out * 16).toFixed(2)}%, 0) rotate(${((close - 1) * 16).toFixed(2)}deg)`;
+        if (frondRight) frondRight.style.transform = `translate3d(${((1 - close) * 46).toFixed(2)}%, ${((1 - close) * 52 - out * 16).toFixed(2)}%, 0) rotate(${((1 - close) * 16).toFixed(2)}deg)`;
+      },
+    );
+  }
+</script>
+
+<style>
+  /*
+   * The hero is taller than the screen; the stage sticks while the page scrolls through it.
+   * Last screen of that height: the next section slides up over the still-pinned stage.
+   */
+  .hero {
+    position: relative;
+    margin-top: calc(-1 * var(--header));
+    color: var(--scene-ink);
+  }
+  .stage {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    min-height: 520px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--scene-sky-1) 0%, var(--scene-sky-2) 42%, var(--scene-sky-3) 66%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.has-js) .hero {
+      height: 430vh;
+      height: 430svh;
+    }
+    :global(.has-js) .stage {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  /* First light spreading from where the sun comes up */
+  .dawn {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(90% 70% at 56% 62%, var(--scene-dawn), transparent 70%);
+  }
+
+  .scene,
+  .mist,
+  .hud {
+    position: absolute;
+    inset: 0;
+  }
+  .defs {
+    position: absolute;
+  }
+  .layer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    overflow: visible;
+  }
+  /* Only the layers the scroll moves get their own compositor layer */
+  .layer[data-layer] {
+    will-change: transform;
+  }
+  /* Tall phones: draw the scene in the lower part and leave the sky open for the headline */
+  @media (max-aspect-ratio: 4 / 5) {
+    .layer {
+      height: 74%;
+    }
+  }
+  .pf {
+    fill: currentColor;
+  }
+  .ps {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ps-near {
+    stroke-width: 2.3;
+  }
+  .ps-mid {
+    stroke-width: 5;
+  }
+  .ps-brush {
+    stroke-width: 2.6;
+  }
+  .l-stars {
+    fill: var(--scene-star);
+  }
+  .l-far {
+    color: var(--scene-far);
+  }
+  .l-rows {
+    color: var(--scene-rows);
+  }
+  .l-mid {
+    color: var(--scene-mid);
+  }
+  .l-near {
+    color: var(--scene-near);
+  }
+  .l-front,
+  .frond {
+    color: var(--scene-front);
+  }
+  .sun {
+    fill: var(--scene-sun);
+  }
+  .glow-0 {
+    stop-color: var(--scene-sun);
+    stop-opacity: 0.95;
+  }
+  .glow-1 {
+    stop-color: var(--scene-sun-glow);
+    stop-opacity: 0.5;
+  }
+  .glow-2 {
+    stop-color: var(--scene-sun-glow);
+    stop-opacity: 0;
+  }
+  /* Mist pooled at the foot of each distant layer */
+  .haze-0 {
+    stop-color: var(--scene-mist);
+    stop-opacity: 0;
+  }
+  .haze-1 {
+    stop-color: var(--scene-mist);
+    stop-opacity: 0.6;
+  }
+
+  /* The worker: limbs are round strokes, the rest is filled */
+  .limb {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .leg {
+    stroke-width: 10.5;
+  }
+  .arm {
+    stroke-width: 7;
+  }
+  .phone-light {
+    fill: var(--scene-screen);
+    opacity: 0.9;
+  }
+
+  /* Dust in the light; fireflies at night */
+  .motes {
+    fill: var(--scene-mote);
+    animation: float 19s ease-in-out infinite alternate;
+  }
+  .motes-2 {
+    animation-duration: 26s;
+    animation-direction: alternate-reverse;
+    opacity: 0.7;
+  }
+  .motes-3 {
+    animation-duration: 33s;
+    opacity: 0.5;
+  }
+  @keyframes float {
+    from {
+      transform: translate(-14px, 12px);
+    }
+    to {
+      transform: translate(22px, -26px);
+    }
+  }
+
+  .frond {
+    position: absolute;
+    bottom: -2%;
+    width: clamp(240px, 44vw, 700px);
+    height: auto;
+    max-width: none;
+    aspect-ratio: 1;
+    overflow: visible;
+    will-change: transform;
+    animation: sway 9s ease-in-out infinite alternate;
+  }
+  .frond-left {
+    left: -1%;
+    transform-origin: 0% 100%;
+  }
+  .frond-right {
+    right: -1%;
+    transform-origin: 100% 100%;
+    animation-duration: 11s;
+    animation-direction: alternate-reverse;
+  }
+  /* `rotate` is its own property, so the breeze never fights the scroll transform */
+  @keyframes sway {
+    from {
+      rotate: -0.9deg;
+    }
+    to {
+      rotate: 1.1deg;
+    }
+  }
+
+  /* Mist: a veil over everything, plus two slow banks that stay on the horizon */
+  .veil {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(80% 60% at 50% 46%, var(--scene-mist), transparent 100%),
+      linear-gradient(180deg, color-mix(in srgb, var(--scene-mist) 70%, transparent), color-mix(in srgb, var(--scene-mist) 92%, transparent) 60%);
+    opacity: 0;
+  }
+  .drift {
+    position: absolute;
+    left: -20%;
+    width: 140%;
+    height: 34%;
+    background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--scene-mist) 78%, transparent), transparent 100%);
+    opacity: 0.28;
+    animation: drift 38s ease-in-out infinite alternate;
+  }
+  .drift-1 {
+    bottom: 22%;
+  }
+  .drift-2 {
+    bottom: 4%;
+    height: 26%;
+    animation-duration: 52s;
+    animation-direction: alternate-reverse;
+  }
+  @keyframes drift {
+    from {
+      transform: translateX(-5%);
+    }
+    to {
+      transform: translateX(5%);
+    }
+  }
+
+  /* Opening line, shown while the mist is down */
+  .intro {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    display: none;
+    justify-items: center;
+    gap: 14px;
+    padding-inline: 24px;
+    text-align: center;
+  }
+  .intro-kicker {
+    font-family: var(--font-accent);
+    font-size: clamp(0.72rem, 1.3vw, 0.82rem);
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.86;
+  }
+  .intro-cue {
+    font-family: var(--font-heading);
+    font-size: clamp(1.05rem, 2.6vw, 1.7rem);
+    font-weight: 500;
+    letter-spacing: 0.34em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+  .intro-arrow {
+    margin-top: 6px;
+    animation: nudge 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(7px);
+    }
+  }
+
+  /* Headline: the lead as a small caps line, "no signal." set wide across the sky */
+  .title-wrap {
+    position: absolute;
+    top: 19%;
+    left: 0;
+    right: 0;
+    padding-inline: clamp(16px, 4vw, 48px);
+    text-align: center;
+    will-change: transform, opacity;
+  }
+  .title {
+    display: grid;
+    justify-items: center;
+    gap: clamp(8px, 1.6vh, 18px);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+  .title-lead {
+    font-family: var(--font-accent);
+    font-size: clamp(0.72rem, 1.35vw, 0.95rem);
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+  .title-mark {
+    /* Trailing space balances the tracking after the last letter */
+    margin-right: -0.14em;
+    font-size: min(11.4vw, 20vh);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  @media (max-aspect-ratio: 4 / 5) {
+    .title-wrap {
+      top: 21%;
+    }
+  }
+
+  /* Field readouts in the corners */
+  .hud {
+    font-family: var(--font-accent);
+    font-size: clamp(0.72rem, 1.05vw, 0.8rem);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    line-height: 1.7;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .hud-item {
+    position: absolute;
+    display: grid;
+  }
+  .hud-item b {
+    font-weight: 600;
+  }
+  .hud-item > span {
+    opacity: 0.8;
+  }
+  .hud-tl,
+  .hud-tr {
+    top: calc(var(--header) + clamp(20px, 4vh, 40px));
+  }
+  .hud-tl,
+  .hud-bl {
+    left: clamp(20px, 3.4vw, 52px);
+  }
+  .hud-tr,
+  .hud-br {
+    right: clamp(20px, 3.4vw, 52px);
+    justify-items: end;
+    text-align: right;
+  }
+  .hud-bl,
+  .hud-br {
+    bottom: clamp(22px, 4.4vh, 44px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--scene-ink-low);
+  }
+  .bars {
+    flex: none;
+    width: 26px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+  }
+  /* Bracket marks at the four corners of the frame */
+  .corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 0 solid var(--scene-ink);
+    opacity: 0.5;
+  }
+  .c-tl,
+  .c-tr {
+    top: calc(var(--header) + clamp(6px, 2vh, 18px));
+  }
+  .c-bl,
+  .c-br {
+    bottom: clamp(10px, 2.2vh, 22px);
+    border-color: var(--scene-ink-low);
+  }
+  .c-tl,
+  .c-bl {
+    left: clamp(8px, 1.6vw, 26px);
+    border-left-width: 1px;
+  }
+  .c-tr,
+  .c-br {
+    right: clamp(8px, 1.6vw, 26px);
+    border-right-width: 1px;
+  }
+  .c-tl,
+  .c-tr {
+    border-top-width: 1px;
+  }
+  .c-bl,
+  .c-br {
+    border-bottom-width: 1px;
+  }
+  @media (max-width: 640px) {
+    .hud-bl span {
+      max-width: 22ch;
+    }
+    .hud-br span {
+      display: none;
+    }
+  }
+
+  /*
+   * With JavaScript and motion allowed, the page opens in mist: these are the first frame,
+   * before the script takes over. Otherwise the cleared scene above is what shows.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.has-js) .veil {
+      opacity: 1;
+    }
+    :global(.has-js) .intro {
+      display: grid;
+    }
+    :global(.has-js) .title-wrap,
+    :global(.has-js) .hud-item {
+      opacity: 0;
+    }
+    :global(.has-js) .l-front {
+      transform: translateY(46%);
+    }
+    :global(.has-js) .l-sun {
+      transform: translateY(27%);
+    }
+    :global(.has-js) .frond-left {
+      transform: translate(-46%, 52%);
+    }
+    :global(.has-js) .frond-right {
+      transform: translate(46%, 52%);
+    }
+  }
+  /* The still version keeps the corners clear so the headline stays readable */
+  @media (prefers-reduced-motion: reduce) {
+    .frond {
+      display: none;
+    }
+  }
+  :global(html:not(.has-js)) .frond {
+    display: none;
+  }
+</style>

@@ -1,5 +1,6 @@
 ## Design system: UI UX Pro Max
-This branch (`uiuxpromax`) is styled with the UI UX Pro Max skill. It does not use antislop or its DESIGN.md.
+This branch (`scrolltide`) builds on the `uiuxpromax` design system (UI UX Pro Max skill). It does not use antislop or its DESIGN.md.
+The home page follows the scroll-driven override in `design-system/faishal-yusuf-baqir-portfolio/pages/home.md` (estate scene, work reel, inked trail); read it before changing the home page.
 For any UI, layout, colour, type or motion work:
 - Read the skill first: `.claude/skills/ui-ux-pro-max/SKILL.md` (the same skill is used by every agent).
 - Follow `design-system/faishal-yusuf-baqir-portfolio/MASTER.md`. A page file in `design-system/faishal-yusuf-baqir-portfolio/pages/<page>.md`, when present, overrides it.

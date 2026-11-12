@@ -63,7 +63,7 @@ const fieldData = phaseRow('Field data');
         </li>
       ))}
     </ul>
-    <p class="label ev-source">Accuracy: LFW benchmark, not field data. Size: model file. Bars start at zero.</p>
+    <p class="label ev-source">Accuracy: LFW benchmark, not field data. <span class="note-size">Size: model file.</span> Bars start at zero.</p>
   </figure>
 )}
 
@@ -325,5 +325,53 @@ const fieldData = phaseRow('Field data');
   }
   .screen-2 {
     transform: translateY(-6%);
+  }
+
+  /*
+   * In the pinned work reel (WorkReel.astro) every card has to fit one screen, so the evidence
+   * is trimmed: the accuracy bars without the size chart, and a tighter phase comparison.
+   */
+  :global(.is-pinned) .ev-chart {
+    gap: 12px;
+  }
+  :global(.is-pinned) .ev-sub,
+  :global(.is-pinned) .bars-size,
+  :global(.is-pinned) .note-size {
+    display: none;
+  }
+  :global(.is-pinned) .bars {
+    gap: 10px;
+  }
+  :global(.is-pinned) .ev-phases {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 10px;
+  }
+  :global(.is-pinned) .phase {
+    gap: 8px;
+    padding: 12px;
+  }
+  :global(.is-pinned) .phase-what {
+    font-size: 0.92rem;
+  }
+  :global(.is-pinned) .nfc svg {
+    width: 40px;
+    height: 40px;
+  }
+  :global(.is-pinned) .ticket {
+    padding: 10px 12px 12px;
+    font-size: 0.74rem;
+  }
+  :global(.is-pinned) .ticket-qr {
+    width: 56px;
+    margin-top: 6px;
+  }
+  :global(.is-pinned) .app {
+    padding: 16px;
+  }
+  :global(.is-pinned) .app-name {
+    font-size: 2rem;
+  }
+  :global(.is-pinned) .ev-screens {
+    max-width: 380px;
   }
 </style>

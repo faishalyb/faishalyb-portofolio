@@ -1,0 +1,430 @@
+---
+/**
+ * 01 Selected work, as a reel: the case studies stand side by side and slide past as the page
+ * scrolls. Where there is room (a wide screen, tall enough for a whole card, motion allowed)
+ * the section pins and the vertical scroll drives the reel. Everywhere else, and without
+ * JavaScript, the same cards are a plain grid, so nothing depends on the pinning.
+ */
+import CaseVisual from './CaseVisual.astro';
+import Icon from './Icon.astro';
+import { caseStudies, pageCopy, profile } from '../data/site';
+
+const total = String(caseStudies.length).padStart(2, '0');
+---
+
+<section class="reel" id="work" aria-labelledby="work-title" data-reel>
+  <div class="reel-pin">
+    <div class="shell reel-grid">
+      <header class="reel-head" data-reveal>
+        <p class="eyebrow"><b>01</b> Selected work</p>
+        <h2 id="work-title">Field apps, measured.</h2>
+        <p class="reel-intro">{pageCopy.workIntro}</p>
+        <div class="reel-meter" aria-hidden="true">
+          <span class="reel-count num"><b data-reel-now>01</b> / {total}</span>
+          <span class="reel-bar"><i data-reel-bar></i></span>
+        </div>
+      </header>
+
+      <div class="reel-view" data-reel-view>
+        <ol class="reel-track" data-reel-track>
+          {caseStudies.map((project) => (
+            <li class="shot" data-shot>
+              <article class="card card-hover shot-card">
+                <div class="shot-ev">
+                  <CaseVisual type={project.visual} />
+                </div>
+                <p class="shot-meta">
+                  <span class="shot-index num" aria-hidden="true">{project.index}</span>
+                  <span class="case-chip">{project.label}</span>
+                  <span class="label num">{project.period}</span>
+                </p>
+                <h3><a class="stretch" href={`/work/${project.slug}`}>{project.title}</a></h3>
+                <p class="case-outcome"><span class="label">Outcome</span>{project.outcome}</p>
+                <span class="case-more" aria-hidden="true">Read the case study <Icon name="arrow-right" size={18} /></span>
+              </article>
+            </li>
+          ))}
+          <!-- CTA after the features -->
+          <li class="shot shot-end">
+            <div class="card end-card">
+              <span class="icon-tile"><Icon name="file-text" size={24} /></span>
+              <h3>Want the full picture?</h3>
+              <p>The résumé and the portfolio PDF cover every role and project in one place.</p>
+              <div class="end-actions">
+                <a class="btn btn-primary" href={profile.resume} target="_blank" rel="noopener">Résumé (PDF) <Icon name="download" size={18} /></a>
+                <a class="btn btn-secondary" href={profile.portfolioPdf} target="_blank" rel="noopener">Portfolio (PDF) <Icon name="download" size={18} /></a>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { clamp, scrub } from '../scripts/scrub';
+
+  const reel = document.querySelector<HTMLElement>('[data-reel]');
+  const view = reel?.querySelector<HTMLElement>('[data-reel-view]');
+  const track = reel?.querySelector<HTMLElement>('[data-reel-track]');
+
+  if (reel && view && track) {
+    const bar = reel.querySelector<HTMLElement>('[data-reel-bar]');
+    const now = reel.querySelector<HTMLElement>('[data-reel-now]');
+    const shots = Array.from(track.querySelectorAll<HTMLElement>('[data-shot]'));
+    const roomy = matchMedia('(min-width: 1000px) and (prefers-reduced-motion: no-preference)');
+    let pinned = false;
+    let travel = 0;
+    let shown = '';
+
+    /** Lay the reel out pinned if a whole card fits under the header; otherwise leave the grid. */
+    const layout = () => {
+      reel.classList.toggle('is-pinned', roomy.matches);
+      const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header')) || 0;
+      pinned = roomy.matches && track.offsetHeight <= innerHeight - header - 32;
+      reel.classList.toggle('is-pinned', pinned);
+      if (pinned) {
+        travel = Math.max(0, track.scrollWidth - view.clientWidth);
+        reel.style.setProperty('--travel', `${travel}px`);
+      } else {
+        travel = 0;
+        reel.style.removeProperty('--travel');
+        track.style.transform = '';
+      }
+    };
+    layout();
+    roomy.addEventListener('change', layout);
+    addEventListener('resize', layout);
+
+    // The page's own scroll moves the reel.
+    scrub(
+      () => (pinned && travel ? clamp(-reel.getBoundingClientRect().top / travel) : 0),
+      (progress) => {
+        if (!pinned) return;
+        const offset = progress * travel;
+        track.style.transform = `translate3d(${(-offset).toFixed(1)}px, 0, 0)`;
+        if (bar) bar.style.transform = `scaleX(${progress.toFixed(4)})`;
+        // The card being read is the last one whose left edge has passed the middle of the view.
+        let index = 0;
+        shots.forEach((shot, i) => {
+          if (shot.offsetLeft - offset < view.clientWidth * 0.5) index = i;
+        });
+        const text = String(index + 1).padStart(2, '0');
+        if (now && text !== shown) now.textContent = shown = text;
+      },
+    );
+
+    // Keyboard: tabbing to a card that is still off to the side scrolls the page to bring it in.
+    track.addEventListener('focusin', (event) => {
+      if (!pinned) return;
+      const shot = (event.target as HTMLElement).closest<HTMLElement>('.shot');
+      if (!shot) return;
+      const target = clamp(shot.offsetLeft - 56, 0, travel);
+      const top = reel.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: top + target, behavior: 'auto' });
+    });
+  }
+</script>
+
+<style>
+  .reel {
+    position: relative;
+    padding-block: clamp(64px, 9vw, 120px);
+  }
+  .reel-grid {
+    display: grid;
+    gap: clamp(28px, 4vw, 48px);
+  }
+  .reel-head {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-md);
+    max-width: 760px;
+  }
+  .reel-intro {
+    max-width: 62ch;
+    color: var(--color-muted-foreground);
+    font-size: 1.1rem;
+  }
+
+  /* How far along the reel: a count and a hairline that fills. Shown only while pinned. */
+  .reel-meter {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    width: min(100%, 320px);
+    margin-top: 8px;
+  }
+  .reel-count {
+    color: var(--color-muted-foreground);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+  .reel-count b {
+    color: var(--color-foreground);
+    font-weight: 700;
+  }
+  .reel-bar {
+    flex: 1;
+    height: 2px;
+    overflow: hidden;
+    background: var(--color-border);
+    border-radius: 2px;
+  }
+  .reel-bar i {
+    display: block;
+    height: 100%;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  /* The plain layout: a grid of cards, one column on phones and two from tablet up */
+  .reel-track {
+    display: grid;
+    gap: 16px;
+  }
+  .shot {
+    display: flex;
+    min-width: 0;
+  }
+  @media (min-width: 760px) {
+    .reel-track {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .shot-end {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .shot-card {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    align-content: start;
+    justify-items: start;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 24px 24px;
+    cursor: pointer;
+  }
+  .shot-ev {
+    display: grid;
+    width: calc(100% + 16px);
+    min-height: 260px;
+    margin-inline: -8px;
+    padding: clamp(16px, 3vw, 28px);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    container-type: inline-size;
+  }
+  .shot-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 4px;
+  }
+  .shot-index {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .case-chip {
+    padding: 4px 12px;
+    color: var(--color-on-accent);
+    background: var(--color-accent);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .shot-card h3 {
+    font-size: clamp(1.25rem, 1.9vw, 1.5rem);
+  }
+  .shot-card h3 a:focus-visible {
+    outline: none;
+  }
+  .shot-card:has(a:focus-visible) {
+    outline: 3px solid var(--color-ring);
+    outline-offset: 3px;
+  }
+  .case-outcome {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+  .case-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+  .case-more :global(.icon) {
+    transition: transform var(--duration) ease;
+  }
+  .shot-card:hover .case-more :global(.icon) {
+    transform: translateX(4px);
+  }
+
+  .end-card {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 12px 24px;
+    width: 100%;
+    padding: clamp(20px, 3vw, 32px);
+  }
+  .end-card p {
+    color: var(--color-muted-foreground);
+  }
+  .end-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (min-width: 960px) {
+    .end-card {
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+    .end-card h3,
+    .end-card p {
+      grid-column: 2;
+    }
+    .end-card .icon-tile {
+      grid-row: 1 / 3;
+    }
+    .end-actions {
+      grid-column: 3;
+      grid-row: 1 / 3;
+    }
+  }
+
+  /*
+   * Pinned (class set by the script): the section grows by the reel's travel, the inner frame
+   * sticks, and the heading stays on the left while the cards pass behind it.
+   */
+  .reel.is-pinned {
+    height: calc(100vh + var(--travel, 0px));
+    padding-block: 0;
+  }
+  .is-pinned .reel-pin {
+    position: sticky;
+    top: 0;
+    display: grid;
+    height: 100vh;
+    align-items: center;
+    padding-top: var(--header);
+    overflow: clip;
+  }
+  .is-pinned .reel-grid {
+    grid-template-columns: minmax(250px, 0.34fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(24px, 3vw, 40px);
+  }
+  .is-pinned .reel-meter {
+    display: flex;
+  }
+  .is-pinned .reel-view {
+    --bleed: calc((100vw - var(--shell)) / 2);
+    margin-right: calc(-1 * var(--bleed));
+    padding-block: 8px 12px;
+    overflow: clip;
+    /* Cards fade out as they pass behind the heading */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 48px);
+    mask-image: linear-gradient(90deg, transparent 0, #000 48px);
+  }
+  .is-pinned .reel-track {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    width: max-content;
+    padding-inline: 48px var(--bleed);
+    will-change: transform;
+  }
+  .is-pinned .shot {
+    width: 520px;
+  }
+  .is-pinned .shot-end {
+    width: 360px;
+  }
+  .is-pinned .shot-card {
+    gap: 12px;
+    padding: 14px 22px 20px;
+  }
+  .is-pinned .shot-ev {
+    min-height: 300px;
+    padding: 18px;
+  }
+  .is-pinned .shot-card h3 {
+    font-size: 1.22rem;
+  }
+  .is-pinned .case-outcome {
+    padding: 10px 14px;
+  }
+  .is-pinned .end-card {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 14px;
+  }
+  .is-pinned .end-card h3,
+  .is-pinned .end-card p,
+  .is-pinned .end-actions,
+  .is-pinned .end-card .icon-tile {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .is-pinned .end-actions {
+    display: grid;
+    width: 100%;
+    margin-top: 6px;
+  }
+  /* Short, wide screens (a 768px-tall laptop): lay each card on its side so it still fits one screen */
+  @media (min-width: 1200px) and (max-height: 780px) {
+    .is-pinned .shot {
+      width: 800px;
+    }
+    .is-pinned .shot-end {
+      width: 340px;
+    }
+    .is-pinned .shot-card {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr auto;
+      align-content: center;
+      column-gap: 24px;
+      padding: 14px 24px 14px 22px;
+    }
+    .is-pinned .shot-ev {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      justify-self: stretch;
+      width: auto;
+      min-height: 0;
+      margin-inline: -8px 0;
+    }
+    .is-pinned .shot-meta {
+      margin-top: 10px;
+    }
+    .is-pinned .shot-card > :not(.shot-ev) {
+      grid-column: 2;
+    }
+    .is-pinned .case-outcome {
+      align-self: end;
+    }
+    .is-pinned .case-more {
+      margin-bottom: 10px;
+    }
+  }
+</style>

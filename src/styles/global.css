@@ -19,7 +19,7 @@
   --color-on-primary: #ffffff;
   --color-secondary: var(--green-500);
   --color-on-secondary: #0b1a06;
-  /* The call to action is the deep green as well, so the palette stays green */
+  /* Every green fill that carries text (buttons, chips, badges) is the deep green with white text */
   --color-accent: var(--green-900);
   --color-on-accent: #ffffff;
   --color-background: #f6faf3;
@@ -71,6 +71,29 @@
   --font-code: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   --page-gradient: none;
+
+  /*
+   * Estate scene (home hero, src/components/EstateScene.astro). Light: a misty morning.
+   * The layers run from pale on the horizon to #336C01 in front, the deepest green on the site.
+   */
+  --scene-sky-1: #bcdcae;
+  --scene-sky-2: #dbeecb;
+  --scene-sky-3: #eef7df;
+  --scene-dawn: rgba(255, 255, 255, 0.9);
+  --scene-sun: #ffffff;
+  --scene-sun-glow: #ffffff;
+  --scene-mist: #f6faf3;
+  --scene-far: #b3d5a1;
+  --scene-rows: #90bf7a;
+  --scene-mid: #659d4c;
+  --scene-near: #44801f;
+  --scene-front: var(--green-900);
+  /* Text over the sky, and over the dark foreground at the foot of the scene */
+  --scene-ink: var(--color-foreground);
+  --scene-ink-low: #ffffff;
+  --scene-star: transparent;
+  --scene-mote: #ffffff;
+  --scene-screen: #e8f8dc;
 }
 
 /*
@@ -80,10 +103,11 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
   --color-primary: var(--green-500);
-  --color-on-primary: #061106;
+  --color-on-primary: #ffffff;
   --color-secondary: var(--green-500);
-  --color-accent: var(--green-500);
-  --color-on-accent: #061106;
+  /* Filled buttons, chips and badges stay #336C01 with white text in both themes */
+  --color-accent: var(--green-900);
+  --color-on-accent: #ffffff;
   --color-background: #061208;
   --color-foreground: #e9f3e4;
   --color-card: rgba(16, 40, 14, 0.72);
@@ -101,6 +125,25 @@
     radial-gradient(60% 45% at 100% 35%, rgba(40, 167, 69, 0.12), transparent 70%),
     radial-gradient(70% 50% at 20% 100%, rgba(51, 108, 1, 0.2), transparent 70%),
     linear-gradient(180deg, #081a09 0%, #061208 45%, #040c05 100%);
+
+  /* Estate scene at night's end: stars above, first light on the ridge, fireflies */
+  --scene-sky-1: #020a04;
+  --scene-sky-2: #082312;
+  --scene-sky-3: #1f5a2a;
+  --scene-dawn: rgba(150, 214, 110, 0.5);
+  --scene-sun: #f6ffd9;
+  --scene-sun-glow: #b9ee84;
+  --scene-mist: #24492c;
+  --scene-far: #2f7038;
+  --scene-rows: #22592a;
+  --scene-mid: #153f1d;
+  --scene-near: #0b2812;
+  --scene-front: #041306;
+  --scene-ink: #e9f3e4;
+  --scene-ink-low: #e9f3e4;
+  --scene-star: #e9f3e4;
+  --scene-mote: #c9f79b;
+  --scene-screen: #7dffa0;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
@@ -240,8 +283,8 @@ p {
   height: 28px;
   place-items: center;
   padding-inline: 6px;
-  color: var(--color-on-primary);
-  background: var(--color-primary);
+  color: var(--color-on-accent);
+  background: var(--color-accent);
   border-radius: var(--radius-full);
   font-size: 0.8125rem;
   font-weight: 700;
@@ -360,10 +403,17 @@ p {
   opacity: 0.92;
   box-shadow: var(--shadow-md);
 }
-/* Secondary: green outline */
+/* Secondary: outline only. Deep green on light, white on dark. */
 .btn-secondary {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--green-900);
+  border-color: var(--green-900);
+}
+[data-theme='dark'] .btn-secondary {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+[data-theme='dark'] .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 .btn-secondary:hover {
   background: var(--color-primary-soft);

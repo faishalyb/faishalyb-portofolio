@@ -26,15 +26,17 @@
 | Bright green | `#28A745` | `#28A745` | `--green-500` |
 | Green 10% (soft fills) | `rgba(40,167,69,0.10)` | same | `--green-10` / `--color-primary-soft` |
 | Primary (links, labels, green text) | `#336C01` | `#28A745` | `--color-primary` |
-| On Primary | `#FFFFFF` | `#061106` | `--color-on-primary` |
-| Accent/CTA (filled buttons) | `#336C01` | `#28A745` | `--color-accent` |
-| On Accent/CTA | `#FFFFFF` | `#061106` | `--color-on-accent` |
+| On Primary | `#FFFFFF` | `#FFFFFF` | `--color-on-primary` |
+| Accent/CTA (filled buttons, chips, badges) | `#336C01` | `#336C01` | `--color-accent` |
+| On Accent/CTA | `#FFFFFF` | `#FFFFFF` | `--color-on-accent` |
 | Background | `#F6FAF3` | dark green gradient (`--page-gradient`, base `#061208`) | `--color-background` |
 | Foreground | `#1D2419` | `#E9F3E4` | `--color-foreground` |
 | Card | `#FFFFFF` | `rgba(16,40,14,0.72)` | `--color-card` |
 | Muted Foreground | `#4B5548` | `#A9BCA3` | `--color-muted-foreground` |
 | Border | `#D4E6CC` | `rgba(40,167,69,0.22)` | `--color-border` |
 | Ring | `#336C01` | `#28A745` | `--color-ring` |
+
+> **Owner override (2026-11-13, branch `scrolltide`):** dark is the default theme; light is the toggle. Every green fill that carries text (buttons, chips, badges, green cards) is `#336C01` with white text in both themes. `#28A745` is for green text and decoration, and at 10% for soft fills.
 
 **Contrast rule:** `#28A745` is only 3.1:1 on white, so in light mode it is used for decoration (status dot, highlight, icons on tiles), never for body text. Green text in light mode is `#336C01` (6.4:1). In dark mode `#28A745` is the text green (5:1+ on the gradient).
 

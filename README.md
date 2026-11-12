@@ -20,12 +20,16 @@ npm run preview  # serve the built site
 | Profile, case studies, experience, publications, readouts | `src/data/site.ts` |
 | Photos (alt text, captions) and company logos | `src/data/photos.ts` |
 | Home page | `src/pages/index.astro` |
+| Home hero: the palm oil estate scene, scrubbed by the scroll | `src/components/EstateScene.astro`, drawn by `src/lib/palm.ts` |
+| Case studies as a reel, experience as an inked trail | `src/components/WorkReel.astro`, `src/components/Journey.astro` |
+| Scroll scrubbing helper | `src/scripts/scrub.ts` |
 | Case study pages (`/work/<slug>`) | `src/pages/work/[slug].astro` |
 | Page shell: meta tags, structured data, theme | `src/layouts/Base.astro` |
 | Evidence next to each case study (chart, phases, apps, screenshots) | `src/components/CaseVisual.astro` |
 | Interactive face check band | `src/components/FaceCheck.astro` |
 | Photo viewer and photo link | `src/components/Viewer.astro`, `src/components/PhotoLink.astro` |
 | Design system (UI UX Pro Max): palette, type, components, motion, checklist | `design-system/faishal-yusuf-baqir-portfolio/MASTER.md` |
+| Home page override: the scroll-driven pattern and its rules | `design-system/faishal-yusuf-baqir-portfolio/pages/home.md` |
 | Colour and type tokens | `src/styles/global.css` |
 | CV and portfolio PDFs | `public/faishal-yusuf-baqir-cv.pdf`, `public/faishal-yusuf-baqir-portfolio.pdf` |
 | Social share image | `scripts/og-cover.html` → `public/og-cover.png` (`npm run og`, needs Google Chrome) |

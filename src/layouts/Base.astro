@@ -60,7 +60,7 @@ const jsonLd = noindex
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -71,15 +71,15 @@ const jsonLd = noindex
         try {
           saved = localStorage.getItem('theme');
         } catch (e) {}
-        // Light by default; dark only when the visitor picked it with the toggle.
-        document.documentElement.dataset.theme = saved === 'dark' ? 'dark' : 'light';
+        // Dark by default; light only when the visitor picked it with the toggle.
+        document.documentElement.dataset.theme = saved === 'light' ? 'light' : 'dark';
       })();
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content={profile.name} />
     <meta name="generator" content={Astro.generator} />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#336c01" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
