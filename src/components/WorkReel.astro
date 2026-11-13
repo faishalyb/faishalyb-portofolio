@@ -2,7 +2,9 @@
 /**
  * 01 Selected work, as a reel: the case studies stand side by side and slide past as the page
  * scrolls. Where there is room (a wide screen, tall enough for a whole card, motion allowed)
- * the section pins and the vertical scroll drives the reel. Everywhere else, and without
+ * the section pins and the vertical scroll drives the reel. Halfway, the reel stands still on the
+ * field case study while the scroll plays its two phases (an NFC tag tapped to a phone, then a
+ * ticket printed on a thermal printer), and then slides on. Everywhere else, and without
  * JavaScript, the same cards are a plain grid, so nothing depends on the pinning.
  */
 import CaseVisual from './CaseVisual.astro';
@@ -63,7 +65,8 @@ const total = String(caseStudies.length).padStart(2, '0');
 </section>
 
 <script>
-  import { clamp, scrub } from '../scripts/scrub';
+  import { clamp, reducedMotion, scrub, wake } from '../scripts/scrub';
+  import { fieldPlayer } from '../scripts/field-play';
 
   const reel = document.querySelector<HTMLElement>('[data-reel]');
   const view = reel?.querySelector<HTMLElement>('[data-reel-view]');
@@ -74,8 +77,14 @@ const total = String(caseStudies.length).padStart(2, '0');
     const now = reel.querySelector<HTMLElement>('[data-reel-now]');
     const shots = Array.from(track.querySelectorAll<HTMLElement>('[data-shot]'));
     const roomy = matchMedia('(min-width: 1000px) and (prefers-reduced-motion: no-preference)');
+    // The field case study's two phases (NFC tap, then printed ticket) play in the middle of the reel
+    const field = track.querySelector<HTMLElement>('[data-field]');
+    const fieldShot = field?.closest<HTMLElement>('[data-shot]') ?? null;
+    const player = field ? fieldPlayer(field) : null;
     let pinned = false;
-    let travel = 0;
+    let travel = 0; // how far the cards slide sideways
+    let hold = 0; // scroll spent with the reel standing still while the phases play
+    let holdAt = 0; // where along the slide it stands still: the field card in the middle of the view
     let shown = '';
 
     /** Lay the reel out pinned if a whole card fits under the header; otherwise leave the grid. */
@@ -86,23 +95,33 @@ const total = String(caseStudies.length).padStart(2, '0');
       reel.classList.toggle('is-pinned', pinned);
       if (pinned) {
         travel = Math.max(0, track.scrollWidth - view.clientWidth);
-        reel.style.setProperty('--travel', `${travel}px`);
+        hold = fieldShot ? Math.round(innerHeight * 1.3) : 0;
+        holdAt = fieldShot
+          ? clamp(fieldShot.offsetLeft + fieldShot.offsetWidth / 2 - view.clientWidth / 2, 0, travel)
+          : 0;
+        reel.style.setProperty('--run', `${travel + hold}px`);
       } else {
-        travel = 0;
-        reel.style.removeProperty('--travel');
+        travel = hold = holdAt = 0;
+        reel.style.removeProperty('--run');
         track.style.transform = '';
       }
+      wake();
     };
     layout();
     roomy.addEventListener('change', layout);
     addEventListener('resize', layout);
 
+    /** How far the page has scrolled into the pinned section. */
+    const scrolled = () => -reel.getBoundingClientRect().top;
+    /** The reel's sideways offset for that scroll: it slides, stands still for the hold, then slides on. */
+    const offsetAt = (y: number) => clamp(y < holdAt ? y : Math.max(holdAt, y - hold), 0, travel);
+
     // The page's own scroll moves the reel.
     scrub(
-      () => (pinned && travel ? clamp(-reel.getBoundingClientRect().top / travel) : 0),
+      () => (pinned && travel + hold ? clamp(scrolled() / (travel + hold)) : 0),
       (progress) => {
         if (!pinned) return;
-        const offset = progress * travel;
+        const offset = offsetAt(progress * (travel + hold));
         track.style.transform = `translate3d(${(-offset).toFixed(1)}px, 0, 0)`;
         if (bar) bar.style.transform = `scaleX(${progress.toFixed(4)})`;
         // The card being read is the last one whose left edge has passed the middle of the view.
@@ -115,14 +134,25 @@ const total = String(caseStudies.length).padStart(2, '0');
       },
     );
 
+    // The field phases: pinned, the hold plays them; in the grid, they play as the card passes up the screen.
+    if (field && player) {
+      scrub(() => {
+        if (reducedMotion.matches) return 1;
+        if (pinned) return hold ? clamp((scrolled() - holdAt) / hold) : 1;
+        return player.passing();
+      }, player.render);
+    }
+
     // Keyboard: tabbing to a card that is still off to the side scrolls the page to bring it in.
     track.addEventListener('focusin', (event) => {
       if (!pinned) return;
       const shot = (event.target as HTMLElement).closest<HTMLElement>('.shot');
       if (!shot) return;
       const target = clamp(shot.offsetLeft - 56, 0, travel);
+      // Cards after the hold sit that much further down the page
+      const y = target > holdAt ? target + hold : target;
       const top = reel.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: top + target, behavior: 'auto' });
+      window.scrollTo({ top: top + y, behavior: 'auto' });
     });
   }
 </script>
@@ -313,11 +343,12 @@ const total = String(caseStudies.length).padStart(2, '0');
   }
 
   /*
-   * Pinned (class set by the script): the section grows by the reel's travel, the inner frame
-   * sticks, and the heading stays on the left while the cards pass behind it.
+   * Pinned (class set by the script): the section grows by the reel's run (its sideways travel
+   * plus the hold where the field phases play), the inner frame sticks, and the heading stays on
+   * the left while the cards pass behind it.
    */
   .reel.is-pinned {
-    height: calc(100vh + var(--travel, 0px));
+    height: calc(100vh + var(--run, 0px));
     padding-block: 0;
   }
   .is-pinned .reel-pin {

@@ -16,7 +16,10 @@ That template is a lunar expedition; here the same pattern is set on the ground,
    a phone walks onto a knoll and fronds close the frame. Corner readouts (field clock, sun elevation) follow the scroll.
 2. **Field log** (`#log`): summary, the two CTAs, portrait, proof points. It slides up over the still-pinned scene.
 3. **Work reel** (`#work`, `src/components/WorkReel.astro`): the case studies side by side; the vertical scroll moves
-   them while the heading stays on the left with a counter and a progress line.
+   them while the heading stays on the left with a counter and a progress line. Halfway, the reel stands still on the
+   field case study (02) for about 1.3 screens of scroll while its two phases play: an NFC tag taps a phone and the
+   screen shows the record (Phase 1), then a Bluetooth thermal printer prints the harvest ticket (Phase 2). Then the
+   reel slides on and the page scrolls down as usual.
 4. Face check, What I do (unchanged, Master rules).
 5. **Trail** (`#experience`, `src/components/Journey.astro`): experience oldest to newest; a route line inks itself
    from stop to stop and a readout shows the year it has reached.
@@ -40,10 +43,14 @@ That template is a lunar expedition; here the same pattern is set on the ground,
   the reel is a plain grid; the trail is fully drawn. Nothing on the page depends on the scrubbing.
 - **The reel pins only where a whole card fits** (at least 1000px wide, and tall enough: the script measures).
   Elsewhere it is the two-column grid from the Master pattern, with the full evidence in each card.
+- **Field phases** (`src/scripts/field-play.ts`): the script writes only `--tap`, `--read`, `--feed` and `--busy` on the
+  figure; the CSS defaults are the finished state (tag on the phone, ticket printed). Unpinned (grid, phones, the
+  case study page) each phase plays while it is in full view. Reduced motion or no JavaScript: finished state.
 
 ## Checklist additions
 
 - [ ] Hero readable at 0%, 50% and 100% of the scrub in both themes
 - [ ] Text over the dark foreground at the foot of the scene uses `--scene-ink-low`
 - [ ] Reel: tabbing to an off-screen card scrolls it into view
+- [ ] Reel: the field card stands still mid-screen while the NFC tap and the ticket print play, then the reel moves on
 - [ ] No horizontal scroll at 375px (the scene layers overflow on purpose and are clipped by the stage)

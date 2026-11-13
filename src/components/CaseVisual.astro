@@ -68,23 +68,60 @@ const fieldData = phaseRow('Field data');
 )}
 
 {type === 'field' && (
-  <figure class="ev ev-phases">
+  <figure class="ev ev-phases" data-field>
     <figcaption class="sr-only">How field data moved from NFC tags in Phase 1 to printed tickets in Phase 2</figcaption>
     <div class="phase">
       <p class="label">Phase 1 · {period[1]}</p>
-      <div class="nfc" aria-hidden="true">
-        <svg viewBox="0 0 64 64"><rect x="6" y="6" width="52" height="52" rx="8" /><path d="M22 22c6 6 6 14 0 20M30 17c9 9 9 21 0 30M38 12c12 12 12 28 0 40" /></svg>
-      </div>
+      <!-- A tag tapped to the phone. The scroll plays it (src/scripts/field-play.ts); as drawn, it is done. -->
+      <svg class="tap" viewBox="0 0 160 128" aria-hidden="true">
+        <g class="tap-tag">
+          <rect x="38" y="40" width="48" height="32" rx="5" />
+          <path d="M49 51q3 5 0 10M54 48q5 8 0 16M59 45q7 11 0 22" />
+        </g>
+        <g class="tap-waves">
+          <path d="M30.1 44.4A34 34 0 0 1 50.4 24.1" />
+          <path d="M22.5 41.6A42 42 0 0 1 47.6 16.5" />
+          <path d="M15 38.9A50 50 0 0 1 44.9 9" />
+        </g>
+        <rect class="tap-body" x="78" y="12" width="56" height="110" rx="11" />
+        <rect class="tap-screen" x="83" y="22" width="46" height="88" rx="4" />
+        <path class="tap-speaker" d="M100 17h12" />
+        <g class="tap-idle">
+          <path d="M98.2 54.2a2.9 2.9 0 0 1 2.9-2.9h9.8a2.9 2.9 0 0 1 2.9 2.9v9.8a2.9 2.9 0 0 1-2.9 2.9h-9.8a2.9 2.9 0 0 1-2.9-2.9zM103 55.4q2 3 0 7.2M106.6 53.6q3 5 0 10.8" />
+          <rect x="94" y="78" width="24" height="4" rx="2" />
+        </g>
+        <g class="tap-done">
+          <g class="tap-check">
+            <circle cx="106" cy="52" r="12" />
+            <path d="M100.5 52.5l3.8 3.8 7.2-7.6" />
+          </g>
+          <rect class="tap-row" x="92" y="74" width="28" height="4" rx="2" />
+          <rect x="92" y="83" width="22" height="4" rx="2" />
+          <rect x="92" y="92" width="26" height="4" rx="2" />
+        </g>
+      </svg>
       <p class="phase-what">{fieldData[1]}</p>
     </div>
     <div class="phase phase-now">
       <p class="label">Phase 2 · {period[2]}</p>
-      <div class="ticket" aria-hidden="true">
-        <b>DO! IAM · HARVEST</b>
-        <span>BLOCK ····· A01</span>
-        <span>BUNCHES ···· 84</span>
-        <span>LOOSE ··· 12 kg</span>
-        <Image class="ticket-qr" src={ticketQr} alt="" width={176} />
+      <!-- The ticket comes out of the printer's mouth, top line first, as the scroll plays it -->
+      <div class="print" aria-hidden="true">
+        <div class="feed">
+          <div class="ticket">
+            <b>DO! IAM · HARVEST</b>
+            <span>BLOCK ····· A01</span>
+            <span>BUNCHES ···· 84</span>
+            <span>LOOSE ··· 12 kg</span>
+            <Image class="ticket-qr" src={ticketQr} alt="" width={176} />
+          </div>
+        </div>
+        <svg class="printer" viewBox="0 0 240 34">
+          <rect class="printer-body" x="1" y="5" width="238" height="28" rx="9" />
+          <rect class="printer-mouth" x="12" y="1" width="216" height="9" rx="4.5" />
+          <rect class="printer-key" x="22" y="17" width="24" height="8" rx="4" />
+          <path class="printer-bt" d="M193 15.5l7 6.5-3.5 3.5V12.5l3.5 3.5-7 6.5" />
+          <circle class="printer-led" cx="214" cy="21" r="3.5" />
+        </svg>
       </div>
       <p class="phase-what">{fieldData[2]}</p>
       <p class="label ev-source">Ticket drawing uses sample values, not field data.</p>
@@ -120,6 +157,20 @@ const fieldData = phaseRow('Field data');
     ))}
   </div>
 )}
+
+<script>
+  import { reducedMotion, scrub } from '../scripts/scrub';
+  import { fieldPlayer } from '../scripts/field-play';
+
+  // The field phases play as they pass up the screen. In the work reel, WorkReel.astro plays them instead.
+  if (!reducedMotion.matches) {
+    for (const figure of document.querySelectorAll<HTMLElement>('[data-field]')) {
+      if (figure.closest('[data-reel]')) continue;
+      const player = fieldPlayer(figure);
+      scrub(player.passing, player.render);
+    }
+  }
+</script>
 
 <style>
   .ev {
@@ -238,19 +289,153 @@ const fieldData = phaseRow('Field data');
     font-weight: 600;
     line-height: 1.35;
   }
-  .nfc svg {
-    width: 56px;
-    height: 56px;
+  /*
+   * Phase 1: an NFC tag tapped to a phone. The scroll sets --tap (tag moves in) and --read
+   * (signal rings, the screen shows the record); the defaults here are the finished state.
+   */
+  .ev-phases {
+    --tap: 1;
+    --read: 1;
+    --feed: 1;
+    --busy: 0;
+  }
+  .tap {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    overflow: visible;
+  }
+  .tap-tag {
+    transform: translate(calc((1 - var(--tap)) * -24px), calc((1 - var(--tap)) * 36px))
+      rotate(calc((1 - var(--tap)) * -18deg));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .tap-tag rect {
+    fill: var(--device-tag);
+    stroke: var(--device-line);
+    stroke-width: 1.5;
+  }
+  .tap-tag path,
+  .tap-waves path {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+  }
+  /* The rings come out one after another */
+  .tap-waves path {
+    opacity: clamp(0, calc(var(--read) * 3 - var(--i, 0)), 1);
+  }
+  .tap-waves path:nth-child(2) {
+    --i: 1;
+  }
+  .tap-waves path:nth-child(3) {
+    --i: 2;
+  }
+  .tap-body {
+    fill: var(--device-body);
+    stroke: var(--device-edge);
+    stroke-width: 1.5;
+  }
+  .tap-screen {
+    fill: var(--device-screen);
+  }
+  .tap-speaker {
+    stroke: var(--device-edge);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .tap-idle {
+    opacity: calc(1 - var(--read));
+  }
+  .tap-idle path {
     fill: none;
     stroke: var(--color-muted-foreground);
-    stroke-width: 3;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+  .tap-idle rect,
+  .tap-done rect {
+    fill: var(--device-line);
+  }
+  .tap-done {
+    opacity: var(--read);
+  }
+  .tap-check {
+    transform: scale(calc(0.5 + 0.5 * var(--read)));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .tap-check circle {
+    fill: var(--color-accent);
+  }
+  .tap-check path {
+    fill: none;
+    stroke: var(--color-on-accent);
+    stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
+  .tap-done .tap-row {
+    fill: var(--color-primary);
+  }
+
+  /*
+   * Phase 2: a Bluetooth thermal printer. The ticket sits in a frame that ends at the printer's
+   * mouth and is clipped there, so --feed slides it up out of the printer. A lip of paper shows
+   * before printing starts.
+   */
+  .print {
+    display: grid;
+    justify-items: center;
+    width: min(260px, 100%);
+  }
+  .feed {
+    width: calc(100% - 40px);
+    margin-bottom: -5px;
+    clip-path: inset(-24px -24px 0 -24px);
+  }
+  .feed .ticket {
+    transform: translateY(calc((1 - var(--feed)) * 96%));
+  }
+  .printer {
+    position: relative; /* paints over the ticket, which is transformed */
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .printer-body {
+    fill: var(--device-body);
+    stroke: var(--device-edge);
+    stroke-width: 1.5;
+  }
+  .printer-mouth {
+    fill: var(--device-slot);
+    stroke: var(--device-edge);
+    stroke-width: 1;
+  }
+  .printer-key {
+    fill: var(--device-edge);
+  }
+  .printer-bt {
+    fill: none;
+    stroke: var(--device-glyph);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: calc(0.45 + 0.55 * var(--busy));
+  }
+  .printer-led {
+    fill: var(--color-secondary);
+    opacity: calc(0.35 + 0.65 * var(--busy));
+  }
+
   /* A drawn paper ticket, so it keeps paper colours in both themes */
   .ticket {
     display: grid;
-    width: min(220px, 100%);
+    width: 100%;
     gap: 2px;
     padding: 14px 16px 18px;
     color: #1b1d18;
@@ -353,16 +538,12 @@ const fieldData = phaseRow('Field data');
   :global(.is-pinned) .phase-what {
     font-size: 0.92rem;
   }
-  :global(.is-pinned) .nfc svg {
-    width: 40px;
-    height: 40px;
-  }
   :global(.is-pinned) .ticket {
     padding: 10px 12px 12px;
     font-size: 0.74rem;
   }
   :global(.is-pinned) .ticket-qr {
-    width: 56px;
+    width: 46px;
     margin-top: 6px;
   }
   :global(.is-pinned) .app {

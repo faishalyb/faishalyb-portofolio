@@ -54,7 +54,8 @@ function frame(now: number) {
   if (moving) requestAnimationFrame(frame);
 }
 
-function wake() {
+/** Re-measure every track on the next frame, for changes that are not a scroll or a resize. */
+export function wake() {
   if (running) return;
   running = true;
   last = performance.now();

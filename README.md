@@ -23,6 +23,7 @@ npm run preview  # serve the built site
 | Home hero: the palm oil estate scene, scrubbed by the scroll | `src/components/EstateScene.astro`, drawn by `src/lib/palm.ts` |
 | Case studies as a reel, experience as an inked trail | `src/components/WorkReel.astro`, `src/components/Journey.astro` |
 | Scroll scrubbing helper | `src/scripts/scrub.ts` |
+| Field phases played by the scroll (NFC tap, printed ticket) | `src/scripts/field-play.ts`, drawn in `src/components/CaseVisual.astro` |
 | Case study pages (`/work/<slug>`) | `src/pages/work/[slug].astro` |
 | Page shell: meta tags, structured data, theme | `src/layouts/Base.astro` |
 | Evidence next to each case study (chart, phases, apps, screenshots) | `src/components/CaseVisual.astro` |

@@ -94,6 +94,15 @@
   --scene-star: transparent;
   --scene-mote: #ffffff;
   --scene-screen: #e8f8dc;
+
+  /* Hardware drawn in the field case study (CaseVisual 'field'): a phone, an NFC tag, a thermal printer */
+  --device-body: #2b3127;
+  --device-edge: #4b5444;
+  --device-slot: #0d100b;
+  --device-glyph: #d9e8d2;
+  --device-screen: #f1f8ec;
+  --device-line: #c4d9b9;
+  --device-tag: #ffffff;
 }
 
 /*
@@ -144,6 +153,12 @@
   --scene-star: #e9f3e4;
   --scene-mote: #c9f79b;
   --scene-screen: #7dffa0;
+
+  --device-body: #1d261b;
+  --device-edge: #5b6a54;
+  --device-screen: #0b1f0d;
+  --device-line: #2f5a33;
+  --device-tag: #e9f3e4;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
