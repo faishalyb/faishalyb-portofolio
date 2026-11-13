@@ -107,10 +107,12 @@ import Icon from './Icon.astro';
     color: #f1f7ec;
     background: rgba(3, 12, 7, 0.92);
     border: 0;
+    overflow: hidden;
   }
+  /* The middle row takes what is left of the screen, and never more, so the photo always fits */
   .viewer[open] {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
   }
   /* MASTER.md modal overlay: dark scrim with a 4px blur */
   .viewer::backdrop {
@@ -131,7 +133,7 @@ import Icon from './Icon.astro';
   }
   .viewer-figure {
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     min-height: 0;
     gap: 12px;
     padding-inline: 16px;
@@ -142,11 +144,15 @@ import Icon from './Icon.astro';
     min-height: 0;
     place-items: center;
   }
+  /* Pinned to the stage so max-width and max-height resolve against it: the whole photo shows, scaled down */
   .viewer-stage img {
+    position: absolute;
+    inset: 0;
     width: auto;
+    height: auto;
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain;
+    margin: auto;
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
   }
